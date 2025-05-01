@@ -1,0 +1,480 @@
+import { Request, Response } from "express";
+import BusinessListing from "../../models/BusinessListing";
+import path from "path";
+import fs from "fs";
+import { uploadImage } from "../../utils/cloudinary";
+import { deleteLocalFile } from "../../utils/deleteImageFromLocalFolder";
+
+// Step 1: Create Contact
+// export const createContact = async (req: Request, res: Response) => {
+//   try {
+//     const contact = new Contact(req.body);
+//     await contact.save();
+//     res.status(201).json({ message: "Contact saved", data: contact });
+//   } catch (error) {
+//     console.error("Error occurred:", error);
+//     res.status(500).json({ message: "Server error", error });
+//   }
+// };
+
+// // Step 2: Create Business Category
+// export const createBusinessCategory = async (req: Request, res: Response) => {
+//   try {
+//     const { category, businessImages, about, keywords, serviceArea } = req.body;
+
+//     if (!category || !businessImages || !about) {
+//       return res.status(400).json({ message: "Missing required fields" });
+//     }
+
+//     const newCategory = new BusinessCategory({
+//       category,
+//       businessImages,
+//       about,
+//       keywords,
+//       serviceArea,
+//     });
+
+//     await newCategory.save();
+//     res.status(201).json({ message: "Business category created successfully!" });
+//   } catch (error) {
+//     console.error("Error creating business category:", error);
+//     res.status(500).json({ message: "Internal Server Error" });
+//   }
+// };
+
+// // Step 3: Create Business Timing
+// export const createBusinessTiming = async (req: Request, res: Response) => {
+//   try {
+//     const { timings } = req.body;
+
+//     // Validate if timings array is provided and is not empty
+//     if (!timings || timings.length === 0) {
+//       return res.status(400).json({ message: "Timings data is required." });
+//     }
+
+//     // Validate that every day has openTime and closeTime if 'isOpen' is true
+//     const invalidTimings = timings.some(item =>
+//       item.isOpen && (!item.openTime || !item.closeTime)
+//     );
+
+//     if (invalidTimings) {
+//       return res.status(400).json({ message: "Please fill in all timings for selected days." });
+//     }
+
+//     // Save business timings
+//     const savedTimings = await BusinessTiming.create(timings);
+
+//     res.status(201).json({ message: "Timings saved successfully", data: savedTimings });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Internal Server Error" });
+//   }
+// };
+
+// // Step 4: Create Upgrade Listing
+// export const createUpgradeListing = async (req: Request, res: Response) => {
+//   const { direction, website, facebook, instagram, linkedin, twitter } = req.body;
+
+//   // Validate the required fields
+//   if (!direction || !website) {
+//     return res.status(400).json({ message: "Direction and Website are required" });
+//   }
+
+//   try {
+//     const upgrade = new UpgradeListing({
+//       direction,
+//       website,
+//       facebook,
+//       instagram,
+//       linkedin,
+//       twitter,
+//     });
+
+//     await upgrade.save();
+
+//     res.status(201).json({
+//       message: "Upgrade listing saved successfully",
+//       data: upgrade,
+//     });
+//   } catch (err) {
+//     console.error("Error saving upgrade listing:", err);
+//     res.status(500).json({
+//       message: "Failed to save upgrade listing",
+//       error: "Internal Server Error",
+//     });
+//   }
+// };
+
+// // Step 5: Create Business Listing
+// export const createBusinessListing = async (req: Request, res: Response) => {
+//   try {
+//     const listing = new BusinessListing(req.body);
+//     await listing.save();
+//     res.status(201).json({ message: "Full business listing saved", data: listing });
+//   } catch (err) {
+//     console.error("BusinessListing Save Error:", err);
+//     res.status(500).json({ message: "Failed to save full business listing", error: err });
+//   }
+// };
+
+// // Step 6: Get All Full Business Listings (merged from 5 forms)
+// export const getAllFullListings = async (req: Request, res: Response) => {
+//   try {
+//     const businessDetails = await BusinessDetails.find();
+//     const contacts = await Contact.find();
+//     const categories = await BusinessCategory.find();
+//     const timings = await BusinessTiming.find();
+//     const upgrades = await UpgradeListing.find();
+
+//     const listings = businessDetails.map((detail, index) => ({
+//       businessDetails: detail,
+//       contactPerson: contacts[index],
+//       categories: categories[index],
+//       timings: timings[index],
+//       upgrade: upgrades[index],
+//     }));
+
+//     res.status(200).json(listings);
+//   } catch (error) {
+//     console.error("Error fetching listings:", error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
+
+// // Step 7: Update Business Status
+// export const updateBusinessStatus = async (req: Request, res: Response) => {
+//   const { id } = req.params;
+//   const { status } = req.body;
+
+//   try {
+//     const listing = await BusinessListing.findById(id);
+//     if (!listing) {
+//       return res.status(404).json({ message: "Listing not found" });
+//     }
+
+//     // Directly update fields in BusinessListing
+//     listing.businessStatus = status;
+//     listing.trustStatus =
+//       status === "Approved" || status === "Pending" ? "Approved" : "Not Approved";
+
+//     await listing.save();
+
+//     res.status(200).json({ message: "Business status updated successfully", listing });
+//   } catch (error) {
+//     console.error("Error updating business status:", error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
+
+// // Step 8: Delete Business Listing by ID
+// // export const deleteBusinessListing = async (req: Request, res: Response) => {
+// //   const { id } = req.params;
+
+// //   try {
+// //     const deletedListing = await BusinessListing.findByIdAndDelete(id);
+
+// //     if (!deletedListing) {
+// //       return res.status(404).json({ message: "Business listing not found" });
+// //     }
+
+// //     res.status(200).json({ message: "Business listing deleted successfully", data: deletedListing });
+// //   } catch (err) {
+// //     console.error("Error deleting business listing:", err);
+// //     res.status(500).json({ message: "Failed to delete business listing", error: err });
+// //   }
+// // };
+
+// // Step 9: Update Publish Status
+// export const updatePublishStatus = async (req: Request, res: Response) => {
+//   const { id } = req.params;
+//   const { status } = req.body;
+
+//   try {
+//     const listing = await BusinessListing.findById(id);
+//     if (!listing) {
+//       return res.status(404).json({ message: "Listing not found" });
+//     }
+
+//     listing.publishedDate = status;
+
+//     await listing.save();
+
+//     res.status(200).json({ message: "Publish status updated successfully", listing });
+//   } catch (error) {
+//     console.error("Error updating publish status:", error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
+
+// // Step 10: Get Business Listing Details by ID
+// export const getBusinessListingDetails = async (req: Request, res: Response) => {
+//   const { id } = req.params;
+
+//   try {
+//     const listing = await BusinessListing.findById(id);
+//     if (!listing) {
+//       return res.status(404).json({ message: "Business listing not found" });
+//     }
+
+//     const businessDetails = await BusinessDetails.findOne({ listingId: id });
+//     const contact = await Contact.findOne({ listingId: id });
+//     const category = await BusinessCategory.findOne({ listingId: id });
+//     const timing = await BusinessTiming.findOne({ listingId: id });
+//     const upgrade = await UpgradeListing.findOne({ listingId: id });
+
+//     return res.status(200).json({
+//       message: "Business listing details fetched successfully",
+//       data: {
+//         listing,
+//         businessDetails,
+//         contact,
+//         category,
+//         timing,
+//         upgrade,
+//       },
+//     });
+//   } catch (error) {
+//     console.error("Error fetching business listing details:", error);
+//     res.status(500).json({ message: "Server error", error });
+//   }
+// };
+
+
+
+
+//////////////////////////////////////////////////////////////////
+
+//////////////////////////////////AASIB KHAN////////////////////////////////////////////////////////////////////////////
+
+export const createBusinessDetails = async (req: Request, res: Response) => {
+  try {
+    const { contactPerson, businessDetails, businessTiming, businessCategory, upgradeListing, } = req.body;
+
+    const parsedBusinessDetails = JSON.parse(businessDetails);
+    const existingBusiness = await BusinessListing.findOne({ "businessDetails.businessName": parsedBusinessDetails.businessName, });
+
+    if (existingBusiness) {
+      return res.status(400).json({ message: "Business already exists", status: false });
+    }
+
+    const files = req.files as Express.Multer.File[] | undefined;
+    const imageUrls: string[] = [];
+    console.log("ZZZZZZZZZZXXXXXXX1:--", req.files);
+    if (files && Array.isArray(files)) {
+      for (const file of files) {
+        const imageUrl = await uploadImage(file.path);
+        console.log("ZZZZZZZZZZXXXXXXX2:--", imageUrl);
+        imageUrls.push(imageUrl);
+        deleteLocalFile(file.path);
+      }
+    }
+
+    console.log("ZZZZZZZZZZXXXXXXX:--", imageUrls);
+
+    const parseBusinessCategory = JSON.parse(businessCategory)
+
+    const listing = new BusinessListing({
+      contactPerson: JSON.parse(contactPerson),
+      businessDetails: { ...parsedBusinessDetails },
+      businessTiming: JSON.parse(businessTiming),
+      businessCategory: { ...parseBusinessCategory, businessImages: imageUrls, },
+      upgradeListing: JSON.parse(upgradeListing),
+    });
+
+    await listing.save();
+    // console.log("DDDDDDDDFFFFFFFDDDDDDDD:::---", listing);
+    res.status(201).json({ message: "Business listing created successfully", status: true, data: listing, });
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error("Error creating business listing:", err);
+    res.status(500).json({ message: "Failed to create business listing", status: false, error: err.message, });
+  }
+};
+
+export const getAllListings = async (req: Request, res: Response) => {
+  try {
+    const listings = await BusinessListing.find()
+      .populate('businessCategory.category')
+      .populate('businessCategory.subCategory')
+
+    console.log("XXXXXXXX", listings)
+    res.status(200).json({ status: true, message: "Listings fetched successfully", data: listings });
+  } catch (error: unknown) {
+    const err = error as Error;
+    res.status(500).json({ message: "Error fetching listings", error: err.message });
+  }
+};
+
+export const getAllListingsById = async (req: Request, res: Response) => {
+  try {
+    const listing = await BusinessListing.findById(req.params.id).populate("businessCategory.category").populate("businessCategory.subCategory");
+    if (!listing) return res.status(404).json({ message: "Not found" });
+
+    res.status(200).json({ data: listing, status: true, message: "Listing fetched successfully" });
+
+  } catch (error: unknown) {
+    const err = error as Error;
+    res.status(500).json({ message: "Error fetching listings", error: err.message });
+  }
+};
+
+export const updateAllListingsById = async (req: Request, res: Response) => {
+  try {
+    const updated = await BusinessListing.findByIdAndUpdate(
+      req.params.id,
+      {
+        contactPerson: JSON.parse(req.body.contactPerson),
+        businessDetails: JSON.parse(req.body.businessDetails),
+        businessTiming: JSON.parse(req.body.businessTiming),
+        businessCategory: JSON.parse(req.body.businessCategory),
+        upgradeListing: JSON.parse(req.body.upgradeListing),
+      },
+      { new: true }
+    );
+    res.json({ message: "Listing updated", data: updated });
+  } catch (error: unknown) {
+    const err = error as Error;
+    res.status(500).json({ message: "Error fetching listings", error: err.message });
+  }
+};
+
+export const deleteBusinessListing = async (req: Request, res: Response) => {
+  try {
+    const listing = await BusinessListing.findById(req.params.id);
+    if (!listing) return res.status(404).json({ message: "Listing not found" });
+
+    // Delete all business images if they exist
+    const images: string[] = listing.businessCategory?.businessImages || [];
+
+    images.forEach((img) => {
+      const filePath = path.join(__dirname, `/uploads/${img}`);
+      console.log("HHHHHHHH", filePath)
+      try {
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      } catch (fileErr) {
+        console.error("Error deleting file:", fileErr);
+      }
+    });
+
+    // Delete the listing from DB
+    await BusinessListing.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({ status: true, message: "Listing deleted", data: listing });
+
+  } catch (error: unknown) {
+    const err = error as Error;
+    res.status(500).json({ message: "Error fetching listings", error: err.message });
+  }
+};
+
+export const updateBusinessListingStatus = async (req: Request, res: Response) => {
+  try {
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({ status: false, message: "New status is required" });
+    }
+
+    const listing = await BusinessListing.findByIdAndUpdate(req.params.id, { "businessDetails.status": status }, { new: true });
+
+    if (!listing) {
+      return res.status(404).json({ status: false, message: "Business listing not found" });
+    }
+
+    res.status(200).json({ status: true, message: "Business listing status updated successfully", data: listing, });
+  } catch (error: unknown) {
+    const err = error as Error;
+    res.status(500).json({ message: "Error fetching listings", error: err.message });
+  }
+};
+
+export const changePublishStatus = async (req: Request, res: Response) => {
+  try {
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({ status: false, message: "New status is required" });
+    }
+
+    const listing = await BusinessListing.findByIdAndUpdate(
+      req.params.id,
+      { "businessDetails.publishedDate": status },
+      { new: true }
+    );
+
+    if (!listing) {
+      return res.status(404).json({ status: false, message: "Business listing not found" });
+    }
+
+    res.status(200).json({
+      status: true,
+      message: "Business listing status updated successfully",
+      data: listing,
+    });
+  } catch (err: any) {
+    console.error("Error updating business listing status:", err);
+    res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      error: err.message,
+    });
+  }
+};
+
+export const listingBulkAction = async (req: Request, res: Response) => {
+  try {
+    const { ids, action } = req.body;
+    console.log("action:-", ids, action)
+    if (!ids || !action) {
+      return res.status(400).json({ status: false, message: "Ids and action are required" });
+    }
+
+    if (action === "Delete") {
+      await BusinessListing.deleteMany({ _id: { $in: ids } });
+      return res.status(200).json({ status: true, message: "Listings deleted successfully" });
+    }
+
+    if (action === "publish") {
+      await BusinessListing.updateMany({ _id: { $in: ids } }, { "businessDetails.publishedDate": action });
+      return res.status(200).json({ status: true, message: "Listings published successfully" });
+    }
+
+    if (action === "unpublish") {
+      await BusinessListing.updateMany({ _id: { $in: ids } }, { "businessDetails.publishedDate": action });
+      return res.status(200).json({ status: true, message: "Listings unpublished successfully" });
+    }
+
+    if (action === "Rejected" || action === "Approved") {
+      await BusinessListing.updateMany({ _id: { $in: ids } }, { "businessDetails.status": action });
+      return res.status(200).json({ status: true, message: "Listings unpublished successfully" });
+    }
+
+
+
+  } catch (error: unknown) {
+    const err = error as Error;
+    res.status(500).json({ message: "Internal server error", error: err.message });
+  }
+};
+
+export const getAllListingsByUserId = async (req: Request, res: Response) => {
+  try {
+    const userId = req.params.id;
+
+    const listings = await BusinessListing.find({ "contactPerson.userId": userId })
+      .populate("businessCategory.category")
+      .populate("businessCategory.subCategory");
+
+    if (!listings || listings.length === 0) {
+      return res.status(404).json({ status: false, message: "No listings found for this user.", });
+    }
+
+    res.status(200).json({ status: true, message: "Listings fetched successfully", data: listings, });
+  } catch (error: unknown) {
+    const err = error as Error;
+    res.status(500).json({ status: false, message: "Internal server error", error: err.message, });
+  }
+};
+
