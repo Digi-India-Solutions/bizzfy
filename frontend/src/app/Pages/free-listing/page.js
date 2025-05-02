@@ -21,7 +21,7 @@ const page = () => {
     setToken(storedData)
   }, []);
 
-console.log("Token:------", token);
+  console.log("Token:------", token);
   // ====== Card ================
   const cardData = [
     {
@@ -263,12 +263,18 @@ console.log("Token:------", token);
                   promotional opportunities.
                 </motion.p>
                 <div className="w-100">
-                  <Link href={token ? "/Pages/freelistingform" : "/Pages/login"}>
-                    <button className="alert alert-primary w-100 fw-bold">
+                  <Link className="text-decoration-none" href={token ? "/Pages/freelistingform" : "/Pages/login"}>
+                    <button className="start-now-btn w-100 fw-bold">
                       Start Now
+                      <span className="arrows">
+                        <i className="bi bi-chevron-right"></i>
+                        <i className="bi bi-chevron-right"></i>
+                        <i className="bi bi-chevron-right"></i>
+                      </span>
                     </button>
                   </Link>
                 </div>
+
               </div>
             </div>
           </div>
