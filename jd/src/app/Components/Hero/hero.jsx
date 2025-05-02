@@ -4,8 +4,13 @@ import Link from "next/link";
 
 import "./hero.css";
 import UserLocation from "../UserLocation/UserLocation";
+import { useRouter } from "next/navigation";
+import { title } from "process";
 
 const Hero = () => {
+  const [location, setLocation] = useState(null);
+  const [searchText, setSearchText] = useState("");
+  const router = useRouter();
   const placeholderTexts = [
     "Search for plumbers...",
     "Find the best tutors...",
@@ -32,6 +37,32 @@ const Hero = () => {
     return () => clearInterval(interval);
   }, [placeholderIndex]);
 
+
+
+
+
+  const handleSearch = async () => {
+    if (!location?.pincode || !searchText.trim()) {
+      alert("Please wait for location and enter a search term.");
+      return;
+    }
+
+    // try {
+    //   const res = await axios.get("http://localhost:5000/api/search", {
+    //     params: {
+    //       query: searchText.trim(),
+    //       pincode: location.pincode,
+    //     },
+    //   });
+
+    // console.log("Search Results:", res.data);
+    router.push(`/Pages/bussiness-listing?query=${searchText.trim()}&pincode=${location.pincode}`);
+    // } catch (err) {
+    //   console.error("Search failed", err);
+    //   alert("Search failed. Try again later.");
+    // }
+  };
+
   return (
     <section className="some-page-hero-bg">
       <div className="container">
@@ -49,16 +80,27 @@ const Hero = () => {
                   <div className="hero-search-container">
                     {/* Location Picker */}
                     <div className="hero-location-picker">
-                      <UserLocation />
+                      <UserLocation location={location} setLocation={setLocation} />
                     </div>
 
                     {/* Search Input */}
                     <input
                       type="text"
                       className="hero-search-input"
+                      onChange={(e) => setSearchText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault(); 
+                          if (searchText.trim() && location?.pincode) {
+                            router.push(`/Pages/bussiness-listing?query=${searchText?.trim()}&pincode=${location.pincode}`);
+                          } else {
+                            alert("Please enter search text and allow location.");
+                          }
+                        }
+                      }}
                       placeholder={animatedText}
                     />
-                    <button className="hero-search-btn">
+                    <button className="hero-search-btn" onClick={handleSearch}>
                       <i className="bi bi-search"></i>
                     </button>
                   </div>
@@ -68,7 +110,7 @@ const Hero = () => {
                   <Link href="#" className="herobutton1">
                     Submit Website
                   </Link>
-                  <Link href="#" className="herobutton2">
+                  <Link href="/Pages/free-listing" className="herobutton2">
                     List Your Business
                   </Link>
                 </div>

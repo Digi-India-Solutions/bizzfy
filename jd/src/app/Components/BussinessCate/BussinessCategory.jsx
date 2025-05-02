@@ -16,6 +16,7 @@ const BussinessCategory = () => {
       try {
         const res = await axios.get("http://localhost:5000/api/categories");
         setCategories(res.data); // Assuming res.data is an array of categories
+        console.log("Categories:", res.data);
         setLoading(false);
       } catch (error) {
         setError("Failed to fetch categories");
@@ -44,14 +45,14 @@ const BussinessCategory = () => {
               <Link href={`Pages/subCategoryFilter?categoryId=${category._id}`} passHref>
                 <div className="bussiness-category-card text-center p-3">
                   {category.icon && (
-                    <Image
-                      src={`http://localhost:5000/uploads/${category.icon}`} 
-                      alt={category.name}
+                    <img
+                      src={`${category?.icon}`} 
+                      alt={category?.name}
                       width={50}
                       height={50}
-                      onError={(e) => {
-                        e.currentTarget.src = "/path/to/default-category-image.png";
-                      }}
+                      // onError={(e) => {
+                      //   e.currentTarget.src = "/path/to/default-category-image.png";
+                      // }}
                     />
                   )}
                   {!category.icon && (

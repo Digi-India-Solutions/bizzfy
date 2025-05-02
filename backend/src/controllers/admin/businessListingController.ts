@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import BusinessListing from "../../models/BusinessListing";
 import path from "path";
 import fs from "fs";
-import { uploadImage } from "../../utils/cloudinary";
+import { deleteImage, uploadImage } from "../../utils/cloudinary";
 import { deleteLocalFile } from "../../utils/deleteImageFromLocalFolder";
 
 // Step 1: Create Contact
@@ -320,21 +320,80 @@ export const getAllListingsById = async (req: Request, res: Response) => {
 
 export const updateAllListingsById = async (req: Request, res: Response) => {
   try {
+    const listingId = req.params.id;
+    const existingListing = await BusinessListing.findById(listingId);
+
+    if (!existingListing) {
+      return res.status(404).json({ status: false, message: "Listing not found" });
+    }
+
+    const files = req.files as Express.Multer.File[] || [];
+    const {
+      contactPerson,
+      businessDetails,
+      businessCategory,
+      upgradeListing,
+    } = req.body;
+
+    // Utility to parse stringified JSON
+    const parseIfJson = (data: any) => {
+      try {
+        return typeof data === "string" ? JSON.parse(data) : data;
+      } catch {
+        return data;
+      }
+    };
+
+    const parsedContact = parseIfJson(contactPerson);
+    const parsedDetails = parseIfJson(businessDetails);
+    const parsedCategory = parseIfJson(businessCategory);
+    const parsedUpgrade = parseIfJson(upgradeListing);
+
+    // Extract files with fieldname `businessImages`
+    const uploadedImageFiles = files.filter(file =>
+      file.fieldname.startsWith("businessImages")
+    );
+
+    let imageUrls: string[] = [];
+
+    if (uploadedImageFiles.length > 0) {
+      // Delete old images before uploading new ones
+      if (existingListing.businessCategory?.businessImages?.length > 0) {
+        for (const oldImage of existingListing.businessCategory.businessImages) {
+          await deleteImage(oldImage);
+        }
+      }
+
+      // Upload new images
+      for (const file of uploadedImageFiles) {
+        const uploadedUrl = await uploadImage(file.path);
+        imageUrls.push(uploadedUrl);
+        deleteLocalFile(file.path);
+      }
+
+      parsedCategory.businessImages = imageUrls;
+    } else {
+      // No new images uploaded, keep existing images
+      parsedCategory.businessImages = existingListing.businessCategory?.businessImages || [];
+    }
+
+    // Perform the update
     const updated = await BusinessListing.findByIdAndUpdate(
-      req.params.id,
+      listingId,
       {
-        contactPerson: JSON.parse(req.body.contactPerson),
-        businessDetails: JSON.parse(req.body.businessDetails),
-        businessTiming: JSON.parse(req.body.businessTiming),
-        businessCategory: JSON.parse(req.body.businessCategory),
-        upgradeListing: JSON.parse(req.body.upgradeListing),
+        contactPerson: parsedContact,
+        businessDetails: parsedDetails,
+        businessCategory: parsedCategory,
+        upgradeListing: parsedUpgrade,
       },
       { new: true }
     );
-    res.json({ message: "Listing updated", data: updated });
+
+    return res.status(200).json({ status: true, message: "Listing updated successfully", data: updated, });
+
   } catch (error: unknown) {
     const err = error as Error;
-    res.status(500).json({ message: "Error fetching listings", error: err.message });
+    return res.status(500).json({ status: false, message: "Error updating listing", error: err.message, });
   }
 };
 
@@ -352,6 +411,7 @@ export const deleteBusinessListing = async (req: Request, res: Response) => {
       try {
         if (fs.existsSync(filePath)) {
           fs.unlinkSync(filePath);
+          deleteImage(img)
         }
       } catch (fileErr) {
         console.error("Error deleting file:", fileErr);
@@ -478,3 +538,46 @@ export const getAllListingsByUserId = async (req: Request, res: Response) => {
   }
 };
 
+export const searchBusinessListings = async (req: Request, res: Response) => {
+  const { query, pincode } = req.query;
+  // console.log("XXXXXXXX", query, pincode)
+  if (!pincode) {
+    return res.status(400).json({ error: "Query and pincode are required" });
+  }
+
+  try {
+    const regex = new RegExp(query as string, "i");
+
+    const listings = await BusinessListing.find({
+      $and: [
+        {
+          $or: [
+           
+            { "businessDetails.businessName": regex },
+            { "businessCategory.about": regex },
+            { "businessCategory.keywords": regex },
+            { "businessCategory.businessService": regex },
+            { "businessCategory.serviceArea": regex },
+            // {
+            //   $expr: {
+            //     $regexMatch: {
+            //       input: { $concat: ["$contactPerson.firstName", " ", "$contactPerson.lastName"] },
+            //       regex: query,
+            //       options: "i",
+            //     },
+            //   },
+            // },
+          ],
+        },
+        { "businessDetails.pinCode": pincode }
+        // { "contactPerson.pinCode": pincode }
+      ]
+    }).populate("businessCategory.category businessCategory.subCategory");
+    console.log("XXXXXXXX", listings)
+    res.status(200).json({ status: true, data: listings });
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error("Search error:", err.message);
+    res.status(500).json({ status: false, message: "Internal server error", error: err.message, });
+  }
+};

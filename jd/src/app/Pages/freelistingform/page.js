@@ -30,11 +30,11 @@ const Page = () => {
   const handleListingSubmit = async () => {
     // console.log("FORMDATA2:-", formData.businessCategory?.businessImages?.bImage);
     const form = new FormData();
-    form.append("contactPerson", JSON.stringify(formData.contactPerson));
-    form.append("businessDetails", JSON.stringify(formData.businessDetails));
-    form.append("businessTiming", JSON.stringify(formData.timings));
-    form.append("businessCategory", JSON.stringify(formData.businessCategory));
-    form.append("upgradeListing", JSON.stringify(formData.upgradeListing));
+    form.append("contactPerson", JSON.stringify(formData?.contactPerson));
+    form.append("businessDetails", JSON.stringify(formData?.businessDetails));
+    form.append("businessTiming", JSON.stringify(formData?.timings));
+    form.append("businessCategory", JSON.stringify(formData?.businessCategory));
+    form.append("upgradeListing", JSON.stringify(formData?.upgradeListing));
     if (formData?.businessCategory?.businessImages?.bImage) {
       formData.businessCategory?.businessImages?.bImage.forEach((file) => form.append("businessImages", file));
     }

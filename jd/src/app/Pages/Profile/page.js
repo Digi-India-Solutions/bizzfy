@@ -81,60 +81,68 @@ const ProfilePage = () => {
     };
 
     const fetchBussinessListing = async () => {
+      if (!userId) return;
       try {
         const res = await axios.get(`http://localhost:5000/api/get-all-listings-by-user-id/${userId}`);
-        console.log("SSSSSSSSSSS", res.data.data)
-        if (res.data.status === true) {
-          setBusinessListing(res.data.data);
+        console.log("Business Listings", res?.data?.data);
+        if (res?.data?.status === true) {
+          setBusinessListing(res?.data?.data);
         } else {
           toast.error("Business listing not found.");
         }
       } catch (err) {
         console.error("Error fetching business listing:", err);
-        // toast.error("Something went wrong while fetching business listing.");
       }
-    }
+    };
 
 
     fetchUserData();
     fetchBussinessListing();
   }, [userId]);
 
-  const handleDelete = (id) => {
-    toast.info(
-      ({ closeToast }) => (
-        <div>
-          <p>Are you sure you want to delete this listing?</p>
-          <div className="d-flex justify-content-end gap-2">
-            <button
-              onClick={() => {
-                confirmDelete(id);
-                closeToast();
-              }}
-              className="btn btn-sm btn-danger"
-            >
-              Yes
-            </button>
-            <button onClick={closeToast} className="btn btn-sm btn-secondary">
-              No
-            </button>
-          </div>
-        </div>
-      ),
-      {
-        position: "top-center",
-        autoClose: false,
-        closeOnClick: false,
-        draggable: false,
-        closeButton: false,
-      }
-    );
-  };
+  // const handleDelete = (id) => {
+  //   toast.info(
+  //     ({ closeToast }) => (
+  //       <div>
+  //         <p>Are you sure you want to delete this listing?</p>
+  //         <div className="d-flex justify-content-end gap-2">
+  //           <button
+  //             onClick={() => {
+  //               confirmDelete(id);
+  //               closeToast();
+  //             }}
+  //             className="btn btn-sm btn-danger"
+  //           >
+  //             Yes
+  //           </button>
+  //           <button onClick={closeToast} className="btn btn-sm btn-secondary">
+  //             No
+  //           </button>
+  //         </div>
+  //       </div>
+  //     ),
+  //     {
+  //       position: "top-center",
+  //       autoClose: false,
+  //       closeOnClick: false,
+  //       draggable: false,
+  //       closeButton: false,
+  //     }
+  //   );
+  // };
 
-  const confirmDelete = (id) => {
-    setListings((prev) => prev.filter((item) => item.id !== id));
-    toast.success("Listing deleted successfully!", { position: "top-right", autoClose: 3000 });
-  };
+  // const confirmDelete = (id) => {
+  //   try {
+  //     const response = axios.delete(`http://localhost:5000/api/delete-business-listing/${id}`);
+  //     if (response.status === true) {
+  //       setListings((prev) => prev.filter((item) => item.id !== id));
+  //       toast.success("Listing deleted successfully!", { position: "top-right", autoClose: 3000 });
+  //     }
+  //   } catch (err) {
+  //     console.error("Error deleting listing:", err);
+  //   }
+
+  // };
 
   // Handle Logout
   const handleLogout = () => {
@@ -143,18 +151,8 @@ const ProfilePage = () => {
         <div className="p-2">
           <p className="mb-2">Are you sure you want to logout?</p>
           <div className="d-flex justify-content-end gap-2">
-            <button
-              onClick={() => {
-                confirmLogout();
-                closeToast();
-              }}
-              className="btn btn-sm btn-danger"
-            >
-              Yes
-            </button>
-            <button onClick={closeToast} className="btn btn-sm btn-secondary">
-              No
-            </button>
+            <button onClick={() => { confirmLogout(); closeToast(); }} className="btn btn-sm btn-danger">Yes</button>
+            <button onClick={closeToast} className="btn btn-sm btn-secondary">No</button>
           </div>
         </div>
       ),
@@ -207,10 +205,8 @@ const ProfilePage = () => {
 
   const uploadProfileImage = async () => {
     if (!selectedFile || !profileData?._id) return;
-
     const formData = new FormData();
     formData.append("image", selectedFile);
-
     try {
       const res = await axios.post(`http://localhost:5000/api/auth/upload-profile-image/${profileData._id}`, formData);
 
@@ -229,10 +225,7 @@ const ProfilePage = () => {
     }
   };
 
-
-
   console.log("User ID:", userId);
-
 
   console.log("XXXXXXXXXXXXX:__--:-", profileData)
   return (
@@ -302,45 +295,27 @@ const ProfilePage = () => {
                     <i className="bi bi-person-circle"></i> Contact Info
                   </button>
                   <button
-                    className={`sidebar-tab ${activeTab === "edit" ? "active" : ""
-                      }`}
-                    onClick={() => setActiveTab("edit")}
-                  >
+                    className={`sidebar-tab ${activeTab === "edit" ? "active" : ""}`} onClick={() => setActiveTab("edit")}                  >
                     <i className="bi bi-pencil-square"></i> Edit Profile
                   </button>
                   <button
-                    className={`sidebar-tab ${activeTab === "all-enquiry" ? "active" : ""
-                      }`}
-                    onClick={() => setActiveTab("all-enquiry")}
-                  >
+                    className={`sidebar-tab ${activeTab === "all-enquiry" ? "active" : ""}`} onClick={() => setActiveTab("all-enquiry")}  >
                     <i className="bi bi-info-circle"></i> All Enquiry
                   </button>
 
                   <button
-                    className={`sidebar-tab ${activeTab === "listing" ? "active" : ""
-                      }`}
-                    onClick={() => setActiveTab("listing")}
-                  >
+                    className={`sidebar-tab ${activeTab === "listing" ? "active" : ""}`} onClick={() => setActiveTab("listing")}>
                     <i className="bi bi-list-task"></i> My Business
                   </button>
                   <button
-                    className={`sidebar-tab ${activeTab === "plan" ? "active" : ""
-                      }`}
-                    onClick={() => setActiveTab("plan")}
-                  >
+                    className={`sidebar-tab ${activeTab === "plan" ? "active" : ""}`} onClick={() => setActiveTab("plan")}>
                     <i className="bi bi-pentagon-half"></i> My Plan
                   </button>
                   <button
-                    className={`sidebar-tab ${activeTab === "support" ? "active" : ""
-                      }`}
-                    onClick={() => setActiveTab("support")}
-                  >
+                    className={`sidebar-tab ${activeTab === "support" ? "active" : ""}`} onClick={() => setActiveTab("support")} >
                     <i className="bi bi-patch-question"></i> Support
                   </button>
-                  <button
-                    className="sidebar-tab"
-                    onClick={() => handleLogout()}
-                  >
+                  <button className="sidebar-tab" onClick={() => handleLogout()} >
                     <i className="bi bi-box-arrow-left"></i> Logout
                   </button>
                   {/* Toast container must be in your component tree */}
@@ -360,20 +335,17 @@ const ProfilePage = () => {
                       <p className="text-muted m-0">{profileData?.email}</p>
                     </div>
                   </div>
-
                   <hr className="my-4" />
-
                   <div className="row g-3">
                     <div className="col-md-6">
                       <div className="d-flex align-items-center p-3 bg-light rounded">
                         <i className="bi bi-phone fs-4 text-primary me-3"></i>
                         <div>
                           <small className="text-muted">Mobile</small>
-                          <p className="fw-semibold mb-0">{profileData.phone}  </p>
+                          <p className="fw-semibold mb-0">{profileData?.phone}  </p>
                         </div>
                       </div>
                     </div>
-
                     <div className="col-md-6">
                       <div className="d-flex align-items-center p-3 bg-light rounded">
                         <i className="bi bi-geo-alt fs-4 text-danger me-3"></i>
@@ -383,7 +355,6 @@ const ProfilePage = () => {
                         </div>
                       </div>
                     </div>
-
                     <div className="col-md-6">
                       <div className="d-flex align-items-center p-3 bg-light rounded">
                         <i className="bi bi-buildings fs-4 text-info me-3"></i>
@@ -393,7 +364,6 @@ const ProfilePage = () => {
                         </div>
                       </div>
                     </div>
-
                     <div className="col-md-6">
                       <div className="d-flex align-items-center p-3 bg-light rounded">
                         <i className="bi bi-map fs-4 text-success me-3"></i>
@@ -406,13 +376,11 @@ const ProfilePage = () => {
                   </div>
                 </div>
               )}
-
               {activeTab === "edit" && (
                 <div className="profile-edit">
                   <h3>Edit Profile</h3>
                   <p>Update your profile details below:</p>
                   <hr />
-
                   <form>
                     <div className="row">
                       <div className="col-md-6">
@@ -429,7 +397,6 @@ const ProfilePage = () => {
                       </div>
                     </div>
                     <div className="row">
-
                       <div className="col-md-6">
                         <div className="mb-3">
                           <label className="form-label">Mobile</label>
@@ -456,7 +423,6 @@ const ProfilePage = () => {
                           <label className="form-label">City</label>
                           <input type="tel" className="form-control" onChange={(e) => setProfileData({ ...profileData, city: e.target.value })} defaultValue={profileData.city} /></div>
                       </div>
-
                       <div className="col-md-6">
                         <div className="mb-3">
                           <label className="form-label">State</label>
@@ -464,7 +430,6 @@ const ProfilePage = () => {
                       </div>
 
                     </div>
-
                     <button className="btn btn-primary" onClick={handleSaveChanges}>Save Changes</button>
                   </form>
                 </div>
@@ -493,27 +458,16 @@ const ProfilePage = () => {
                           <div className="col-md-9">
                             <h4 className="text-primary">{listing?.businessDetails?.businessName}</h4>
                             <p className="text-success">{[listing?.businessDetails?.area, listing?.businessDetails?.city, listing?.businessDetails?.state, listing?.businessDetails?.pinCode].filter(Boolean).join(", ")}</p>
-                            <Link
-                              href="/Pages/free-listing#paidlisting"
-                              className="login-btn me-2"
-                            >
+                            <Link href="/Pages/free-listing#paidlisting" className="login-btn me-2" >
                               Advertise Now
                             </Link>
-                            <button
-                              // href="/Pages/Profile/edit-profile"
-                              className={`black-btn ${activeTab === "edit-business" ? "active" : ""
-                                }`}
-                              onClick={() => { setActiveTab("edit-business"), setListingId(listing) }}
-                            >
+                            <button className={`black-btn ${activeTab === "edit-business" ? "active" : ""}`} onClick={() => { setActiveTab("edit-business"), setListingId(listing) }}>
                               Edit Business
                             </button>
 
-                            <button
-                              className="btn btn-danger"
-                              onClick={() => handleDelete(listing?._id)}
-                            >
+                            {/* <button className="btn btn-danger" onClick={() => handleDelete(listing?._id)}>
                               <i className="bi bi-trash"></i>
-                            </button>
+                            </button> */}
                           </div>
                         </div>
                       </div>
@@ -528,7 +482,7 @@ const ProfilePage = () => {
 
               {activeTab === "edit-business" && (
                 <>
-                  <EditBusinessProfile  listingId={listingId}/>
+                  <EditBusinessProfile listingId={listingId} />
                 </>
               )}
 

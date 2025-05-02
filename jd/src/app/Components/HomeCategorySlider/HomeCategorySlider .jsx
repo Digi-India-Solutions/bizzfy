@@ -9,7 +9,7 @@ import "./HomeCategoryslider.css";
 import Image from "next/image";
 import Link from "next/link";
 import Automobile from "../../Images/Automobile.jpg";
-import Education from "../../Images/Education.jpg"; 
+import Education from "../../Images/Education.jpg";
 import Healthcare from "../../Images/Healthcare.jpg";
 import Retail from "../../Images/LocalShops.webp";
 import Estate from "../../Images/RealEstate.jpg";
@@ -26,6 +26,7 @@ const cards = [
 ];
 
 const HomeCategorySlider = () => {
+  console.log("XXXXXXXXXXXXXXXXXXX HomeCategorySlider")
   return (
     <>
       <section className="home-category-section">

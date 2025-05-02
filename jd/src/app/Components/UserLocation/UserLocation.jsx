@@ -3,8 +3,7 @@
 
 import React, { useEffect, useState } from "react";
 
-export default function UserLocation() {
-  const [location, setLocation] = useState(null);
+export default function UserLocation({ location, setLocation }) {
   const [error, setError] = useState(null);
   const [retry, setRetry] = useState(false);
 
@@ -57,11 +56,10 @@ export default function UserLocation() {
     const data = await response.json();
     const address = data.address || {};
 
-    const city =
-      address.city || address.town || address.village || address.hamlet || "";
+    const city = address.city || address.town || address.village || address.hamlet || "";
     const state = address.state || "";
-
-    return { city, state };
+    const pincode = address.postcode || "";
+    return { city, state, pincode };
   };
 
   return (
@@ -69,7 +67,7 @@ export default function UserLocation() {
       {location ? (
         <>
           <p className="m-0 p-0 location-detact">
-            {location.city}{" "} {location.state}
+            {location.city}, {location.state}
           </p>
         </>
       ) : (

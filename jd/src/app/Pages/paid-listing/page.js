@@ -4,7 +4,7 @@ import React from "react";
 import profileImage from "../../Images/blog1.jpg";
 import "./paid-listing.css";
 
-const page = () => {
+const page = ({ visibleBusinesses }) => {
   const Arr = [
     {
       name: "Digi India Solution",
@@ -56,39 +56,39 @@ const page = () => {
       <div className="container">
         <div className="col-md-12">
           <div className="custom-row">
-            {Arr.map((shop, index) => (
+            {visibleBusinesses.map((shop, index) => (
               <div key={index} className="custom-col">
                 <div>
                   <div className="listing-content">
                     <div className="d-grid">
                       <div className="d-flex align-items-center gap-2">
                         <Link className="listing-brand-name" href="#">
-                          <h5>Biziffy</h5>
+                          <h5>{shop?.businessDetails?.businessName}</h5>
                         </Link>
                       </div>
                       <Link
-                        href="https://digiindiasolutions.com"
+                        href={shop?.upgradeListing?.website}
                         target="_blank"
                       >
-                        <p>digiindiasolution.com</p>
+                        <p>{shop?.upgradeListing?.website?.replace(/^https?:\/\//, '')}</p>
                       </Link>
                     </div>
                   </div>
 
                   <div className="align-items-center listing-title">
-                    <Link
-                      href={shop.link}
+                    {/* <Link
+                      href={shop?.link}
                       className="text-decoration-none"
                       target="_blank"
                     >
-                      <h5>{shop.name}</h5>
-                    </Link>
+                      <h5>{shop?.name}</h5>
+                    </Link> */}
                     <p className="listing-description">
-                      {shop.description.slice(0, 100)}...
+                      {shop?.businessCategory?.about.slice(0, 100)}...
                     </p>
                     <div className="d-flex flex-wrap align-items-center gap-1 mt-2">
-                      {shop.keyworad?.slice(0, 3).map((keyword, idx) => (
-                        <p key={idx} className="m-0 text-dark" style={{fontSize:"14px"}}>
+                      {shop?.businessCategory?.keywords?.slice(0, 3).map((keyword, idx) => (
+                        <p key={idx} className="m-0 text-dark" style={{ fontSize: "14px" }}>
                           <i className="bi bi-check pe-1"></i>
                           {keyword}
                         </p>
@@ -98,10 +98,10 @@ const page = () => {
                 </div>
 
                 <div className="listing-image">
-                  <Image
-                    src={shop.image}
+                  <img
+                    src={shop?.businessCategory?.businessImages[1]}
                     className="paid-listing-image"
-                    alt={shop.name}
+                    alt={shop?.businessDetails?.businessName}
                   />
                 </div>
               </div>
