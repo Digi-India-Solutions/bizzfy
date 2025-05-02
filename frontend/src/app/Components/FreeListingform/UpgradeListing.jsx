@@ -49,11 +49,12 @@ const UpgradeListing = ({formData, setFormData ,handleListingSubmit}) => {
 
   return (
     <form onSubmit={handleSubmit} className="business-timing-container">
-      <h5 className="section-title">Switch to Upgrade</h5>
-      <p>
+      <h2 className="section-title">Additional URL'S</h2>
+      <hr />
+      {/* <p>
         <b>Exclusive Offer:</b> Upgrade to Premium now and enjoy priority
         ranking, verified trust, and more business leads!
-      </p>
+      </p> */}
 
       {/* Google Map URL */}
       <div className="mb-3">
@@ -99,9 +100,9 @@ const UpgradeListing = ({formData, setFormData ,handleListingSubmit}) => {
         ))}
       </div>
 
-      <button type="submit" className="btn btn-warning w-100 fw-bold py-3">
+      {/* <button type="submit" className="btn btn-warning w-100 fw-bold py-3">
         Switch to Upgrade
-      </button>
+      </button> */}
 
       {/* Submit Without Upgrade */}
       <div className="mt-2">

@@ -146,7 +146,7 @@ const BusinessTiming = ({ setKey, formData, setFormData }) => {
 
       {/* Opening and Closing Time for All */}
       <div className="all-days-time mb-3">
-        <div className="row">
+        <div className="row align-items-self-end">
           <div className="col-md-4 time-selection-div">
             <label>Open Time</label>
             <select
@@ -215,7 +215,7 @@ const BusinessTiming = ({ setKey, formData, setFormData }) => {
             className="btn col-md-4 btn-dark apply-time-btn"
             onClick={applyAllDaysTime}
           >
-            Apply
+            Apply to All
           </button>
         </div>
       </div>

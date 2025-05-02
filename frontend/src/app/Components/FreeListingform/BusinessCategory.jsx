@@ -58,7 +58,7 @@ const BusinessCategory = ({ setKey, formData, setFormData }) => {
 
   const handleSubCategoryChange = (e) => {
     const values = Array.from(e.target.selectedOptions, (o) => o.value);
-    setSubCategory(values);
+    setSubCategory((prev) => [...new Set([...prev, ...values])]);
   };
 
   const handleImageChange = (e) => {
@@ -125,35 +125,74 @@ const BusinessCategory = ({ setKey, formData, setFormData }) => {
 
       <div className="mb-3">
         <label className="form-label">Select Business Category <sup>*</sup></label>
-        <select className="form-control" required value={category} onChange={(e) => setCategory(e.target.value)}>
-          <option value="">Select Your Category</option>
-          {categoryList.map((cat) => (
-            <option key={cat._id} value={cat._id}>{cat.name}</option>
-          ))}
-        </select>
+        <div className="relative">
+          <select
+            className="form-control"
+            required
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            <option value="">Select Your Category</option>
+            {categoryList.map((cat) => (
+              <option key={cat._id} value={cat._id}>{cat.name}</option>
+            ))}
+          </select>
+        </div>
+
       </div>
 
       <div className="mb-3">
-        <label className="form-label">Select Business SubCategory <sup>*</sup></label>
-        <select className="form-control" multiple required onChange={handleSubCategoryChange} value={subCategory}>
-          {subCategoryList.map((cat) => (
-            <option key={cat._id} value={cat._id}>{cat.name}</option>
-          ))}
-        </select>
-        <div className="mt-2">
+        <label className="form-label">
+          Select Business SubCategory <sup>*</sup>
+        </label>
+
+        {/* Wrapper to prevent select overlap */}
+        <div className="position-relative">
+          <select
+            className="form-control"
+            required
+            onChange={handleSubCategoryChange}
+            value={subCategory}
+          // style={{ height: 'auto', minHeight: '30px' }} 
+          >
+            <option value="">Select Your SubCategory</option>
+            {subCategoryList.map((cat) => (
+              <option key={cat._id} value={cat._id} >
+                {cat.name}
+              </option>
+            ))}
+          </select>
+
+          <i
+            className="bi bi-chevron-down"
+            style={{
+              position: 'absolute',
+              right: '15px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              pointerEvents: 'none',
+              color: '#6c757d'
+            }}
+          ></i>
+        </div>
+
+        {/* Display selected subcategories as badges */}
+        <div className="mt-2 d-flex flex-wrap">
           {subCategory.map((cat) => (
-            <span key={cat} className="badge bg-primary m-1 p-2">
+            <span key={cat} className="badge bg-primary m-1 d-flex align-items-center">
               {subCategoryList.find((item) => item._id === cat)?.name || cat}
               <button
                 type="button"
-                className="btn-close ms-2 bg-danger"
+                className="btn-close btn-close-white ms-2"
                 onClick={() => removeItem(subCategory, setSubCategory, cat)}
                 aria-label="Remove"
+                style={{ filter: 'invert(1)' }} // Ensures visibility on colored badge
               />
             </span>
           ))}
         </div>
       </div>
+
 
       <div className="mb-3">
         <label className="form-label">Business Services (press Enter to add)<sup>*</sup></label>
