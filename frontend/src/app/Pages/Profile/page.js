@@ -10,7 +10,7 @@ import Support from "../../Components/ProfilesComponents/Support/Support";
 import { toast, ToastContainer } from "react-toastify";
 import Head from "next/head";
 import axios from "axios";
-
+import Dashboard from "../../Components/Dashboard/Dashboard"
 const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [userId, setUserId] = useState("");
@@ -288,15 +288,15 @@ const ProfilePage = () => {
                 <hr className="text-white" />
                 <div className="sidebar-button-main">
                   <button
+                    className={`sidebar-tab ${activeTab === "dashboard" ? "active" : ""}`} onClick={() => setActiveTab("dashboard")}                  >
+                    <i className="bi bi-pencil-square"></i> Dashboard
+                  </button>
+                  <button
                     className={`sidebar-tab ${activeTab === "overview" ? "active" : ""
                       }`}
                     onClick={() => setActiveTab("overview")}
                   >
                     <i className="bi bi-person-circle"></i> Contact Info
-                  </button>
-                  <button
-                    className={`sidebar-tab ${activeTab === "edit" ? "active" : ""}`} onClick={() => setActiveTab("edit")}                  >
-                    <i className="bi bi-pencil-square"></i> Edit Profile
                   </button>
                   <button
                     className={`sidebar-tab ${activeTab === "all-enquiry" ? "active" : ""}`} onClick={() => setActiveTab("all-enquiry")}  >
@@ -326,13 +326,20 @@ const ProfilePage = () => {
             <div className="col-md-9 py-3 fix-scroll-height">
               {activeTab === "overview" && (
                 <div className="profile-overview card border-0 rounded-4">
-                  <div className="d-flex align-items-center">
-                    <div className="profile-overview-main avatar bg-dark text-white rounded-circle d-flex align-items-center justify-content-center me-3">
-                      {profileData?.fullName?.charAt(0)}
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div className="d-flex align-items-center">
+                      <div className="profile-overview-main avatar bg-dark text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                        {profileData?.fullName?.charAt(0)}
+                      </div>
+                      <div>
+                        <h5 className="mb-1 text-dark fw-bold">{profileData?.fullName}</h5>
+                        <p className="text-muted m-0">{profileData?.email}</p>
+                      </div>
                     </div>
                     <div>
-                      <h5 className="mb-1 text-dark fw-bold">{profileData?.fullName}</h5>
-                      <p className="text-muted m-0">{profileData?.email}</p>
+                      <button className="btn btn-primary" onClick={() => setActiveTab("edit")}>
+                        <i className="bi bi-pencil-square"></i> Edit Profile
+                      </button>
                     </div>
                   </div>
                   <hr className="my-4" />
@@ -519,6 +526,13 @@ const ProfilePage = () => {
                   <Support />
                 </>
               )}
+              {activeTab === "dashboard" && (
+                <>
+                  <Dashboard />
+                </>
+              )}
+
+            
             </div>
           </div>
         </div>

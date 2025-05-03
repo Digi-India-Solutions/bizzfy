@@ -106,16 +106,17 @@
 
 .step {
   display: flex;
-  align-items: center;
   background: white;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   width: 45%;
+  gap: 10px;
 }
 
 .left {
   flex-direction: row;
+
 }
 
 .right {
@@ -185,6 +186,38 @@
   margin-bottom: 1rem;
 }
 
+.start-now-btn {
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.3s, transform 0.3s;
+}
+
+.start-now-btn:hover {
+  transform: scale(1.03);
+  background: linear-gradient(135deg, #0072ff, #00c6ff);
+}
+
+.start-now-btn .arrows {
+  display: flex;
+  gap: 4px;
+  margin-left: 10px;
+  animation: blinkArrows 1s infinite;
+}
+
+@keyframes blinkArrows {
+  0% { opacity: 0.3; transform: translateX(0); }
+  50% { opacity: 1; transform: translateX(5px); }
+  100% { opacity: 0.3; transform: translateX(0); }
+}
 
 
 @media (max-width: 768px) {

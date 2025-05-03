@@ -185,20 +185,39 @@ const Header = () => {
             </div>
              ) : (
 
-              <div className="d-flex align-items-center">
-              <Link
-                href="/Pages/Profile"
-                className="btn btn bg-success text-white me-2"
-              >
-                Profile
-              </Link>
+              <div className="dropdown">
               <button
-                onClick={handleLogout}
-                className="btn btn-danger text-white"
+                className="btn border-0 d-flex align-items-center"
+                type="button"
+                id="profileDropdown"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                style={{ backgroundColor: 'transparent' }}
               >
-                Logout
+                <i className="bi bi-person-circle fs-3 text-dark"></i>
               </button>
+            
+              <ul
+                className="dropdown-menu dropdown-menu-end shadow-lg border-0"
+                aria-labelledby="profileDropdown"
+                style={{ minWidth: '150px' }}
+              >
+                <li>
+                  <Link href="/Pages/Profile" className="dropdown-item d-flex align-items-center gap-2">
+                    <i className="bi bi-person"></i> Dashboard
+                  </Link>
+                </li>
+                <li>
+                  <button
+                    className="dropdown-item d-flex align-items-center gap-2 text-danger"
+                    onClick={handleLogout}
+                  >
+                    <i className="bi bi-box-arrow-right"></i> Logout
+                  </button>
+                </li>
+              </ul>
             </div>
+            
           )}
           </div>
         </div>

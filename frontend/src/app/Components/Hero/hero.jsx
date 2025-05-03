@@ -108,7 +108,7 @@ const Hero = () => {
 
                 <div className="hero-buttons">
                   <Link href="#" className="herobutton1">
-                    Submit Website
+                    List Your Website
                   </Link>
                   <Link href="/Pages/free-listing" className="herobutton2">
                     List Your Business
