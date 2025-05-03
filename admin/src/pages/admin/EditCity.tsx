@@ -1,4 +1,3 @@
-
 import { AdminLayout } from "@/components/Layout/AdminLayout";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -7,89 +6,130 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate, useParams } from "react-router-dom";
+import { getData, postData } from "@/services/FetchNodeServices";
+import { Country, State, City } from "country-state-city";
 
 const EditCity = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const [loading, setLoading] = useState(true);
+  const [countries, setCountries] = useState([]);
+  const [allStates, setAllStates] = useState([]);
+  const [allCities, setAllCities] = useState([]);
+
+  const [selectedCountry, setSelectedCountry] = useState("IN");
+  const [selectedState, setSelectedState] = useState("");
+
+  const [searchState, setSearchState] = useState("");
+  const [searchCity, setSearchCity] = useState("");
+
   const [formData, setFormData] = useState({
     name: "",
-    country: "",
+    state: "",
     badge: "",
-    image: "",
-    color: "#6E59A5",
-    isActive: true
+    image: null,
+    color: "#9b87f5",
+    topCity: false,
+    isActive: true,
   });
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
-  const navigate = useNavigate();
 
+  // Fetch city details for editing
   useEffect(() => {
-    const fetchCityDetails = async () => {
+    const fetchCity = async () => {
       try {
-        // In a real app, this would be an API call
-        setTimeout(() => {
-          // Simulating API response with mock data based on ID
-          const mockCity = {
-            _id: id,
-            name: id === '1' ? 'New York' : id === '2' ? 'London' : 'Paris',
-            country: id === '1' ? 'United States' : id === '2' ? 'United Kingdom' : 'France',
-            badge: id === '1' ? 'Popular' : id === '2' ? 'Featured' : 'New',
-            image: '/placeholder.svg',
-            color: id === '1' ? '#6E59A5' : id === '2' ? '#9b87f5' : '#8B5CF6',
-            isActive: true
-          };
+        const res = await getData(`city/get-city-by-id/${id}`);
+        if (res.status) {
+          const city = res.data;
+          setSelectedCountry("IN"); // Assuming it's always India
+          const stateObj = State.getAllStates().find((s) => s.name === city.state);
+          if (stateObj) {
+            setSelectedState(stateObj.isoCode);
+            const cities = City.getCitiesOfState("IN", stateObj.isoCode);
+            setAllCities(cities);
+          }
 
-          setFormData(mockCity);
-          setLoading(false);
-        }, 500);
-      } catch (error) {
-        console.error("Error fetching city details:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to load city details. Please try again.",
-        });
+          setFormData({
+            name: city.name || "",
+            state: city.state || "",
+            badge: city.badge || "",
+            image: null,
+            color: city.color || "#9b87f5",
+            topCity: city.topCity || false,
+            isActive: city.isActive || false,
+          });
+        }
+      } catch (err) {
+        toast({ variant: "destructive", title: "Error", description: "Failed to load city data." });
+      } finally {
         setLoading(false);
       }
     };
+    fetchCity();
+  }, [id]);
 
-    if (id) {
-      fetchCityDetails();
+  useEffect(() => {
+    setCountries(Country.getAllCountries());
+    setAllStates(State.getStatesOfCountry(selectedCountry));
+    setAllCities([]);
+    setSelectedState("");
+    setFormData((prev) => ({ ...prev, state: "", name: "" }));
+  }, [selectedCountry]);
+
+  useEffect(() => {
+    if (selectedState) {
+      const cities = City.getCitiesOfState(selectedCountry, selectedState);
+      setAllCities(cities);
     }
-  }, [id, toast]);
+  }, [selectedState]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+  const handleChange = (e) => {
+    const { name, value, type, checked, files } = e.target;
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : type === "file" ? files[0] : value,
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
+    const form = new FormData();
+    form.append("name", formData.name);
+    form.append("state", formData.state);
+    form.append("badge", formData.badge);
+    form.append("color", formData.color);
+    form.append("topCity", formData.topCity.toString());
+    form.append("isActive", formData.isActive.toString());
+    if (formData.image) form.append("image", formData.image);
+
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: "City Updated",
-        description: `${formData.name} has been successfully updated.`,
-      });
-      
-      navigate("/admin/cities");
-    } catch (error) {
-      console.error("Error updating city:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to update city. Please try again.",
-      });
+      const res = await postData(`city/update-city/${id}`, form);
+      if (res.status) {
+        toast({
+          title: "City Updated",
+          description: `${formData.name}, ${formData.state} has been updated.`,
+        });
+        navigate("/admin/cities");
+      } else {
+        throw new Error();
+      }
+    } catch {
+      toast({ variant: "destructive", title: "Error", description: "Failed to update city." });
     } finally {
       setLoading(false);
     }
   };
+
+  const filteredStates = allStates.filter((s) =>
+    s.name.toLowerCase().includes(searchState.toLowerCase())
+  );
+
+  const filteredCities = allCities.filter((c) =>
+    c.name.toLowerCase().includes(searchCity.toLowerCase())
+  );
 
   if (loading) {
     return (
@@ -104,113 +144,165 @@ const EditCity = () => {
   return (
     <AdminLayout title="Edit City">
       <div className="flex flex-col gap-5">
-        <h1 className="text-2xl font-bold">Edit City: {formData.name}</h1>
+        <h1 className="text-2xl font-bold">Update City</h1>
 
         <Card>
           <CardContent className="pt-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="name">City Name *</Label>
-                  <Input 
-                    id="name" 
-                    name="name" 
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="Enter city name"
-                    required
-                  />
-                </div>
-
+                {/* Country */}
                 <div className="space-y-2">
                   <Label htmlFor="country">Country *</Label>
-                  <Input 
-                    id="country" 
-                    name="country" 
-                    value={formData.country}
-                    onChange={handleChange}
-                    placeholder="Enter country"
-                    required
-                  />
+                  <select
+                    id="country"
+                    className="w-full border rounded px-3 py-2"
+                    value={selectedCountry}
+                    onChange={(e) => setSelectedCountry(e.target.value)}
+                  >
+                    {countries.map((country) => (
+                      <option key={country.isoCode} value={country.isoCode}>
+                        {country.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
+                {/* State */}
+                <div className="space-y-2 relative">
+                  <Label>State *</Label>
+                  <Input
+                    value={searchState}
+                    onChange={(e) => setSearchState(e.target.value)}
+                    placeholder="Search state..."
+                  />
+                  {searchState && (
+                    <ul className="absolute z-10 bg-white border rounded max-h-40 overflow-y-auto w-full">
+                      {filteredStates.map((s) => (
+                        <li
+                          key={s.isoCode}
+                          className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={() => {
+                            setSelectedState(s.isoCode);
+                            setFormData((prev) => ({ ...prev, state: s.name }));
+                            setSearchState("");
+                          }}
+                        >
+                          {s.name}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {formData.state && (
+                    <p className="text-sm text-gray-600 mt-1">
+                      Selected: <strong>{formData.state}</strong>
+                    </p>
+                  )}
+                </div>
+
+                {/* City */}
+                <div className="space-y-2 relative">
+                  <Label>City Name *</Label>
+                  <Input
+                    value={searchCity}
+                    onChange={(e) => setSearchCity(e.target.value)}
+                    placeholder="Search city..."
+                  />
+                  {searchCity && (
+                    <ul className="absolute z-10 bg-white border rounded max-h-40 overflow-y-auto w-full">
+                      {filteredCities.map((c, i) => (
+                        <li
+                          key={i}
+                          className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={() => {
+                            setFormData((prev) => ({ ...prev, name: c.name }));
+                            setSearchCity("");
+                          }}
+                        >
+                          {c.name}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {formData.name && (
+                    <p className="text-sm text-gray-600 mt-1">
+                      Selected: <strong>{formData.name}</strong>
+                    </p>
+                  )}
+                </div>
+
+                {/* Badge */}
                 <div className="space-y-2">
                   <Label htmlFor="badge">Badge</Label>
-                  <Input 
-                    id="badge" 
-                    name="badge" 
+                  <Input
+                    name="badge"
                     value={formData.badge}
                     onChange={handleChange}
-                    placeholder="e.g. Popular, Featured, New"
+                    placeholder="e.g. Popular"
                   />
-                  <p className="text-xs text-gray-500">
-                    Optional label that appears on the city card
-                  </p>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="image">Image URL</Label>
-                  <Input 
-                    id="image" 
-                    name="image" 
-                    value={formData.image}
-                    onChange={handleChange}
-                    placeholder="https://example.com/city-image.jpg"
-                  />
-                  <p className="text-xs text-gray-500">
-                    Add a URL for the city image
-                  </p>
-                </div>
-
+                {/* Color */}
                 <div className="space-y-2">
                   <Label htmlFor="color">Color</Label>
                   <div className="flex gap-2">
-                    <input
+                    <Input
                       type="color"
-                      id="color"
                       name="color"
                       value={formData.color}
                       onChange={handleChange}
-                      className="h-10 w-10 border rounded p-1"
+                      className="w-12 h-9 p-1"
                     />
-                    <Input 
+                    <Input
+                      type="text"
+                      name="color"
                       value={formData.color}
                       onChange={handleChange}
-                      name="color"
-                      placeholder="#6E59A5"
-                      className="flex-1"
+                      placeholder="#HEX"
                     />
                   </div>
-                  <p className="text-xs text-gray-500">
-                    Choose a color for the city card
-                  </p>
                 </div>
 
+                {/* Image */}
+                <div className="space-y-2">
+                  <Label htmlFor="image">Image</Label>
+                  <Input
+                    type="file"
+                    name="image"
+                    onChange={handleChange}
+                  />
+                  <p className="text-xs text-gray-500">Add/replace city image</p>
+                </div>
+
+                {/* Top City */}
                 <div className="flex items-center space-x-2 h-full">
-                  <input 
-                    type="checkbox" 
-                    id="isActive" 
-                    name="isActive" 
+                  <input
+                    type="checkbox"
+                    name="topCity"
+                    checked={formData.topCity}
+                    onChange={handleChange}
+                    className="h-4 w-4"
+                  />
+                  <Label htmlFor="topCity">Top City</Label>
+                </div>
+
+                {/* Active */}
+                <div className="flex items-center space-x-2 h-full">
+                  <input
+                    type="checkbox"
+                    name="isActive"
                     checked={formData.isActive}
                     onChange={handleChange}
                     className="h-4 w-4"
                   />
-                  <Label htmlFor="isActive">Active</Label>
+                  <Label htmlFor="isActive">isActive</Label>
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-2">
-                <Button 
-                  type="button" 
-                  variant="outline"
-                  onClick={() => navigate("/admin/cities")}
-                >
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => navigate("/admin/cities")}>
                   Cancel
                 </Button>
-                <Button 
-                  type="submit" 
-                  disabled={loading}
-                >
+                <Button type="submit" disabled={loading}>
                   {loading ? "Updating..." : "Update City"}
                 </Button>
               </div>

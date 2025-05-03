@@ -123,7 +123,6 @@ export const verifyOtpController = async (req: Request, res: Response): Promise<
 };
 
 // POST /api/auth/login
-
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
@@ -214,7 +213,7 @@ export const getUserById = async (req: Request, res: Response): Promise<void> =>
 
 export const uploadProfileImage = async (req: Request, res: Response): Promise<void> => {
   try {
-  
+
     const user = await User.findById(req.params.id);
     if (!user) {
       res.status(404).json({ status: false, message: "User not found" });
@@ -237,9 +236,81 @@ export const uploadProfileImage = async (req: Request, res: Response): Promise<v
   }
 }
 
+export const toggleUserStatus = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { status } = req.body
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      res.status(404).json({ status: false, message: "User not found" });
+      return;
+    }
 
+    user.status = status || user.status;
+    await user.save();
 
+    res.status(200).json({ status: true, message: "User status toggled successfully", data: user });
+  } catch (error: any) {
+    console.error("Toggle User Status Error:", error);
+    res.status(500).json({ status: false, message: "Internal Server Error", error: error.message });
+  }
+}
 
+export const getAllUse = async (req: Request, res: Response) => {
+  try {
+    const users = await User.find().sort({ createdAt: -1 });
+    res.status(200).json({ status: true, data: users });
+  } catch (err) {
+    console.error('Error fetching users:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch users' });
+  }
+};
+
+export const deleteBulkUser = async (req: Request, res: Response) => {
+  try {
+    const deletedUser = await User.findByIdAndDelete(req.body.userId);
+    res.status(200).json({ status: true, data: deletedUser });
+  } catch (err) {
+    console.error('Error deleting user:', err);
+    res.status(500).json({ success: false, message: 'Failed to delete user' });
+  }
+}
+
+export const bulkDeactivate = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { status, userIds } = req.body;
+
+    if (!Array.isArray(userIds) || typeof status !== "string") {
+      res.status(200).json({ status: false, message: "Invalid input" });
+      return;
+    }
+
+    const results = await Promise.all(
+      userIds.map(async (id) => {
+        const user = await User.findById(id);
+        if (user) {
+          user.status = status;
+          await user.save();
+          return { id, success: true };
+        } else {
+          return { id, success: false, error: "User not found" };
+        }
+      })
+    );
+
+    const failed = results.filter((r) => !r.success);
+
+    if (failed.length > 0) {
+      res.status(207).json({ status: false, message: "Some users were not updated", results, });
+    } else {
+      res.status(200).json({ status: true, message: `All users marked as ${status ? "Active" : "Inactive"} successfully`, });
+    }
+  } catch (error: any) {
+    console.error("Toggle User Status Error:", error);
+    res.status(500).json({ status: false, message: "Internal Server Error", error: error.message, });
+  }
+};
+
+/////////////////////////////////////////////////////////////////////////
 
 
 // POST /api/auth/forgot-password
@@ -374,12 +445,3 @@ export const googleLoginController = async (req: Request, res: Response) => {
 // this for all users display in admin panel
 
 
-export const getAllUsers = async (req: Request, res: Response) => {
-  try {
-    const users = await User.find();
-    res.status(200).json({ success: true, users });
-  } catch (err) {
-    console.error('Error fetching users:', err);
-    res.status(500).json({ success: false, message: 'Failed to fetch users' });
-  }
-};

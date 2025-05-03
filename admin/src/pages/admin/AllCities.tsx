@@ -1,4 +1,3 @@
-
 import { AdminLayout } from "@/components/Layout/AdminLayout";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -7,15 +6,17 @@ import { Link } from "react-router-dom";
 import { Plus, Edit, Trash2, MapPin } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
+import { getData } from "@/services/FetchNodeServices";
+import Swal from "sweetalert2";
 
 interface City {
   _id: string;
   name: string;
   country: string;
-  badge?: string;
-  image: string;
+  imageUrl: string;
   color?: string;
-  isActive: boolean;
+  status: "active" | "inactive";
+  topCity: boolean;
 }
 
 const AllCities = () => {
@@ -27,42 +28,9 @@ const AllCities = () => {
   useEffect(() => {
     const fetchCities = async () => {
       try {
-        // Simulate API call for now
-        // Replace with actual API call when backend is ready
-        setTimeout(() => {
-          const mockCities = [
-            {
-              _id: '1',
-              name: 'New York',
-              country: 'United States',
-              badge: 'Popular',
-              image: '/placeholder.svg',
-              color: '#6E59A5',
-              isActive: true
-            },
-            {
-              _id: '2',
-              name: 'London',
-              country: 'United Kingdom',
-              badge: 'Featured',
-              image: '/placeholder.svg',
-              color: '#9b87f5',
-              isActive: true
-            },
-            {
-              _id: '3',
-              name: 'Paris',
-              country: 'France',
-              badge: 'New',
-              image: '/placeholder.svg',
-              color: '#8B5CF6',
-              isActive: true
-            }
-          ];
-          
-          setCities(mockCities);
-          setLoading(false);
-        }, 1000);
+        const res = await getData("city/get-all-city");
+        console.log("res", res.data);
+        if (res.status === true) setCities(res.data);
       } catch (error) {
         console.error("Error fetching cities:", error);
         toast({
@@ -70,6 +38,7 @@ const AllCities = () => {
           title: "Error",
           description: "Failed to load cities. Please try again later.",
         });
+      } finally {
         setLoading(false);
       }
     };
@@ -77,16 +46,48 @@ const AllCities = () => {
     fetchCities();
   }, [toast]);
 
-  const handleDelete = (id: string) => {
-    // In a real app, make an API call to delete the city
-    setCities(cities.filter(city => city._id !== id));
-    toast({
-      title: "City Deleted",
-      description: "The city has been successfully deleted.",
+  const handleDelete = async (id: string) => {
+    const confirm = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you really want to delete this city?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
     });
+
+    if (confirm.isConfirmed) {
+      try {
+        setLoading(true);
+        const response = await getData(`city/delete-city/${id}`);
+        if (response.status) {
+          setCities(prev => prev.filter(city => city._id !== id));
+          toast({
+            title: "City Deleted",
+            description: "The city has been successfully deleted.",
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Failed",
+            description: "Could not delete the city.",
+          });
+        }
+      } catch (error) {
+        console.error("Delete error:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Something went wrong while deleting.",
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 
-  const filteredCities = cities.filter(city => 
+  const filteredCities = cities.filter(city =>
     city.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     city.country.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -103,7 +104,7 @@ const AllCities = () => {
             </Button>
           </Link>
         </div>
-        
+
         <div className="flex w-full max-w-sm items-center space-x-2 mb-4">
           <Input
             type="text"
@@ -124,12 +125,12 @@ const AllCities = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredCities.length > 0 ? (
               filteredCities.map(city => (
-                <Card key={city._id} className="overflow-hidden">
-                  <div 
-                    className="h-[120px] bg-cover bg-center" 
-                    style={{ 
-                      backgroundImage: `url(${city.image || '/placeholder.svg'})`,
-                      backgroundColor: city.color || '#f3f4f6'
+                <Card key={city._id} className="overflow-hidden shadow hover:shadow-lg transition-shadow">
+                  <div
+                    className="h-[120px] bg-cover bg-center"
+                    style={{
+                      backgroundImage: `url(${city.cityImage || '/placeholder.svg'})`,
+                      backgroundColor: city.color || '#f3f4f6',
                     }}
                   />
                   <CardHeader className="pb-2">
@@ -141,32 +142,32 @@ const AllCities = () => {
                           {city.country}
                         </p>
                       </div>
-                      {city.badge && (
-                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
-                          {city.badge}
+                      {city.topCity && (
+                        <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
+                          Top City
                         </span>
                       )}
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between items-center">
                       <div className="flex space-x-2">
                         <Link to={`/admin/cities/edit/${city._id}`}>
                           <Button variant="outline" size="sm">
                             <Edit className="h-4 w-4" />
                           </Button>
                         </Link>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => handleDelete(city._id)}
                           className="text-red-500 hover:text-red-700"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
-                      <span className={`text-xs px-2 py-1 rounded-full ${city.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                        {city.isActive ? 'Active' : 'Inactive'}
+                      <span className={`text-xs px-2 py-1 rounded-full ${city.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                        {city.status === 'active' ? 'Active' : 'Inactive'}
                       </span>
                     </div>
                   </CardContent>

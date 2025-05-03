@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/pagination";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { getData, postData } from "@/services/FetchNodeServices";
+import Swal from "sweetalert2";
 
 interface UserData {
   _id: string;
@@ -53,50 +55,27 @@ const AllUsers = () => {
     setLoading(true);
     setError("");
     try {
-        const response = await axios.get("http://localhost:5000/api/admin/auth/all");
-        // console.log("API Response:", response.data);
-        if (response.status !== 200) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = response?.data?.users
+      const response = await getData("admin/auth/get-use-all");
+      console.log("API Response:", response.data);
+      if (response.status === true) {
+        const data = response?.data
         console.log("Fetched users:", data);
         setUserList(data);
-        // if (data?.users && Array.isArray(data?.users)) {
-        //     const filteredData = data.users.filter((user): user is UserData =>
-        //         typeof user?._id === 'string' &&
-        //         typeof user?.name === 'string' &&
-        //         typeof user?.email === 'string' &&
-        //         typeof user?.phone === 'string' &&
-        //         ['Active', 'Inactive', 'Deactivated'].includes(user?.status)
-        //     );
-        //     setUserList(filteredData);
-        //     console.log("UserList after setting:", filteredData); // ADD THIS LINE
-        // } else if (Array.isArray(data)) {
-        //     const filteredData = data.filter((user): user is UserData =>
-        //         typeof user?._id === 'string' &&
-        //         typeof user?.name === 'string' &&
-        //         typeof user?.email === 'string' &&
-        //         typeof user?.phone === 'string' &&
-        //         ['Active', 'Inactive', 'Deactivated'].includes(user?.status)
-        //     );
-        //     setUserList(filteredData);
-        //     console.log("UserList after setting (array data):", filteredData); // ADD THIS LINE
-        // } else {
-        //     console.error("Unexpected response format:", data);
-        //     setUserList([]);
-        //     setError("Failed to load users due to unexpected data format.");
-        // }
-    } catch (err: unknown) {
-        if (err instanceof Error) {
-            setError("Failed to load users: " + err.message);
-        } else {
-            setError("Failed to load users: An unknown error occurred.");
-        }
-        setUserList([]);
-    } finally {
         setLoading(false);
+      }
+
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError("Failed to load users: " + err.message);
+      } else {
+        setError("Failed to load users: An unknown error occurred.");
+      }
+      setUserList([]);
+      setLoading(false);
+    } finally {
+      setLoading(false);
     }
-};
+  };
 
   const handleDeleteUser = async (userId: string) => {
     const confirmed = window.confirm("Are you sure you want to delete this user?");
@@ -121,23 +100,15 @@ const AllUsers = () => {
 
   const handleUpdateStatus = async (userId: string, newStatus: UserData["status"]) => {
     try {
-      const response = await axios.patch(`http://localhost:5000/api/admin/auth/all/${userId}/toggle-status`, { status: newStatus }, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await postData(`admin/auth/all/${userId}/toggle-status`, { status: newStatus });
 
-      if (response.status !== 200) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (response.status === true) {
+        const updatedUser: UserData = response.data;
+        setUserList((prevUsers) =>
+          prevUsers.map((user) => user._id === updatedUser._id ? updatedUser : user)
+        );
+        setEditingStatusId(null);
       }
-
-      const updatedUser: UserData = response.data;
-      setUserList((prevUsers) =>
-        prevUsers.map((user) =>
-          user._id === updatedUser._id ? updatedUser : user
-        )
-      );
-      setEditingStatusId(null);
     } catch (error: unknown) {
       if (error instanceof Error) {
         console.error("Error updating status:", error);
@@ -156,7 +127,7 @@ const AllUsers = () => {
     });
   };
 
- 
+
   const handleBulkCheckboxChange = () => {
     const currentVisibleIds = currentUsers.map((user) => user._id);
     const allSelected = currentVisibleIds.every((id) => selectedUsers.includes(id));
@@ -170,52 +141,52 @@ const AllUsers = () => {
 
   console.log("Search Query:", searchQuery);
   console.log("Users:", userList);
-  
+
   const filteredUsers = searchQuery
     ? userList.filter((user) => {
-        const name = user?.fullName || "";
-        const email = user?.email || "";
-        const phone = user?.phone || "";
-  
-        const matches =
-          name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          phone.includes(searchQuery);
-  
-        console.log(`Checking user: ${name}, match: ${matches}`);
-        return matches;
-      })
+      const name = user?.fullName || "";
+      const email = user?.email || "";
+      const phone = user?.phone || "";
+
+      const matches =
+        name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        phone.includes(searchQuery);
+
+      console.log(`Checking user: ${name}, match: ${matches}`);
+      return matches;
+    })
     : userList;
-  
-    console.log("Filtered Users:", filteredUsers);
-  
 
-  
-// console.log("Filtered Users:", filteredUsers);
+  console.log("Filtered Users:", filteredUsers);
 
-const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
-const indexOfLastUser = currentPage * usersPerPage;
-const indexOfFirstUser = indexOfLastUser - usersPerPage;
-const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
-// Pagination handler
-const paginate = (page: number) => setCurrentPage(page);
 
-// Page number renderer
-const renderPageNumbers = () => {
-  const maxVisible = 10;
-  let start = Math.max(1, currentPage - Math.floor(maxVisible / 1));
-  const end = Math.min(totalPages, start + maxVisible - 1);
-  if (end - start + 1 < maxVisible) {
-    start = Math.max(1, end - maxVisible + 1);
-  }
+  // console.log("Filtered Users:", filteredUsers);
 
-  const pages = [];
-  for (let i = start; i <= end; i++) {
-    pages.push(i);
-  }
-  return pages;
-};
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+
+  // Pagination handler
+  const paginate = (page: number) => setCurrentPage(page);
+
+  // Page number renderer
+  const renderPageNumbers = () => {
+    const maxVisible = 10;
+    let start = Math.max(1, currentPage - Math.floor(maxVisible / 1));
+    const end = Math.min(totalPages, start + maxVisible - 1);
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+
+    const pages = [];
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
+  };
 
 
   const exportToCSV = () => {
@@ -248,60 +219,57 @@ const renderPageNumbers = () => {
   };
 
   const handleBulkAction = async () => {
-    if (bulkAction === "Delete") {
-      if (selectedUsers.length > 0) {
-        const confirmed = window.confirm("Are you sure you want to delete the selected users?");
-        if (confirmed) {
-          try {
-            const deletePromises = selectedUsers.map((userId) =>
-              axios.delete(`http://localhost:5000/api/admin/users/${userId}`)
-            );
-            const responses = await Promise.all(deletePromises);
-            if (responses.every((res) => res.status === 200)) {
-              fetchUsers();
-              setSelectedUsers([]);
-              alert("Selected users deleted successfully.");
-            } else {
-              const errors = await Promise.all(responses.map(res => res.status !== 200 ? res.data?.message || `Failed with status ${res.status}` : null));
-              console.error("Error deleting users:", errors);
-              setError("Failed to delete some or all users.");
-            }
-          } catch (err: unknown) {
-            console.error("Error deleting users:", err);
-            setError("Failed to delete users: " + (err instanceof Error ? err.message : "An unknown error occurred."));
-          }
-        }
-      } else {
-        alert("Please select users to delete.");
-      }
-    } else if (bulkAction === "Deactivate") {
-      if (selectedUsers.length > 0) {
-        try {
-          const response = await axios.patch("http://localhost:5000/api/admin/users/bulk-deactivate", { userIds: selectedUsers }, {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-          if (response.status === 200) {
-            fetchUsers();
-            setSelectedUsers([]);
-            alert("Selected users deactivated successfully.");
-          } else {
-            console.error("Failed to deactivate users:", response.data?.message || `Failed with status ${response.status}`);
-            setError("Failed to deactivate users.");
-          }
-        } catch (error: unknown) {
-          console.error("Error deactivating users:", error);
-          if (error instanceof Error) {
-            setError("Failed to deactivate users: " + error.message);
-          } else {
-            setError("Failed to deactivate users: An unknown error occurred.");
-          }
-        }
-      } else {
-        alert("Please select users to deactivate.");
-      }
+    if (selectedUsers.length === 0) {
+      Swal.fire("No users selected", "Please select users to perform the action.", "info");
+      return;
     }
+
+    try {
+      if (bulkAction === "Delete") {
+        const confirm = await Swal.fire({
+          title: "Are you sure?",
+          text: "Do you really want to delete the selected users?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Yes, delete them!",
+        });
+
+        if (confirm.isConfirmed) {
+          const responses = await Promise.all(selectedUsers.map((userId) => postData("admin/auth/delete-bulk-user", { userId })));
+
+          const allSuccessful = responses.every((res) => res?.status === true);
+
+          if (allSuccessful) {
+            await fetchUsers();
+            setSelectedUsers([]);
+            Swal.fire("Deleted!", "Selected users have been deleted.", "success");
+          } else {
+            Swal.fire("Error", "Some users could not be deleted.", "error");
+          }
+        }
+      } else if (bulkAction === "Active" || bulkAction === "Inactive") {
+        console.log("Selected Users:bulkAction", bulkAction);
+        const response = await postData("admin/auth/bulk-deactivate", {
+          userIds: selectedUsers, status: bulkAction,
+        });
+
+        if (response?.status === 200 || response?.status === true) {
+          await fetchUsers();
+          setSelectedUsers([]);
+          Swal.fire("Updated", `Users have been marked as ${bulkAction}.`, "success");
+        } else {
+          throw new Error(response?.message || "Failed to update user statuses.");
+        }
+      }
+    } catch (error: unknown) {
+      const errorMsg = error instanceof Error ? error.message : "An unknown error occurred.";
+      console.error("Bulk action error:", errorMsg);
+      setError("Bulk action failed: " + errorMsg);
+      Swal.fire("Error", errorMsg, "error");
+    }
+
     setBulkAction("Bulk Action");
   };
 
@@ -323,7 +291,9 @@ const renderPageNumbers = () => {
           >
             <option value="Bulk Action">Bulk Action</option>
             <option value="Delete">Delete</option>
-            <option value="Deactivate">Deactivate</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+            {/* <option value="pending">pending</option> */}
           </select>
           <Button className="bg-blue-500 hover:bg-blue-600" onClick={handleBulkAction} disabled={selectedUsers.length === 0 && bulkAction !== "Bulk Action"}>
             Apply
@@ -331,12 +301,12 @@ const renderPageNumbers = () => {
         </div>
 
         <div className="flex items-center gap-2">
-        <Input
-  placeholder="Search..."
-  value={searchQuery}
-  onChange={(e) => setSearchQuery(e.target.value)}
-  className="max-w-sm"
-/>
+          <Input
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="max-w-sm"
+          />
 
           <Button className="bg-blue-500 hover:bg-blue-600" onClick={exportToCSV}>
             Export to CSV
@@ -389,7 +359,7 @@ const renderPageNumbers = () => {
                       <div className="relative inline-block">
                         {editingStatusId === user._id ? (
                           <div className="absolute z-10 bg-white border rounded shadow-md">
-                            {["Active", "Inactive", "Deactivated"].map((status) => (
+                            {["Active", "Inactive", "pending"].map((status) => (
                               <div
                                 key={status}
                                 className="px-3 py-1 cursor-pointer hover:bg-gray-100"

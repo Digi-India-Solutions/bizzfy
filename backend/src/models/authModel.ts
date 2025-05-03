@@ -12,7 +12,7 @@ const authSchema = new Schema(
     city: { type: String, },
     state: { type: String, },
     whatsappNumber: { type: String, },
-    status: { type: String, enum: ["active", "inactive", "pending"], default: "pending", },
+    status: { type: String, enum: ["Active", "Inactive", "pending"], default: "pending", },
     profileImage: {
       type: String,
     },

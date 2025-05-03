@@ -23,7 +23,7 @@ import membershipRoutes from "./routes/admin/membershipRoutes"; // ✅ important
 import cityRoutes from "./routes/admin/cityRoutes";
 import dealRoutes from "./routes/admin/dealRoutes";
 import collectionRoutes from "./routes/admin/collectionRoutes";
-import cityRoutes1 from "./routes/admin/cityRoutes1"; // <-- Rename this
+import stateRoutes from "./routes/admin/stateRoutes"; // <-- Rename this
 
 // hm yaha per all listiing ka data import kr rhe hai
 import businessListingRoutes from "./routes/admin/businessListingRoutes";
@@ -74,12 +74,11 @@ app.use("/api/links", linkRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/admin", membershipRoutes); 
 app.use("/api", businessListingRoutes);
-app.use("/api/admin", cityRoutes); 
+app.use("/api/city", cityRoutes); 
 app.use("/api/admin", dealRoutes);
 app.use("/api/admin", collectionRoutes);
-app.use("/api/admin/cityRoutes1", cityRoutes1); 
+app.use("/api/state", stateRoutes); 
 
-// 
 app.use("/api/admin", businessListingRoutes); // this makes /api/admin/business and /api/admin/contact work
 
 // signup

@@ -294,6 +294,7 @@ export const createBusinessDetails = async (req: Request, res: Response) => {
 export const getAllListings = async (req: Request, res: Response) => {
   try {
     const listings = await BusinessListing.find()
+      .sort({ createdAt: -1 }) 
       .populate('businessCategory.category')
       .populate('businessCategory.subCategory')
 
@@ -552,7 +553,7 @@ export const searchBusinessListings = async (req: Request, res: Response) => {
       $and: [
         {
           $or: [
-           
+
             { "businessDetails.businessName": regex },
             { "businessCategory.about": regex },
             { "businessCategory.keywords": regex },
