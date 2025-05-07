@@ -12,6 +12,7 @@ const categories = [
   { id: "servicearea", label: "Service Area", icon: "bi-map" },
   { id: "url", label: "Business URL", icon: "bi-link-45deg" },
   { id: "img", label: "Business Image", icon: "bi-card-image" },
+  { id: "faq", label: "FAQ", icon: "bi-question-circle" },
 ];
 
 export default function EditBusinessProfile({ listingId }) {
@@ -29,8 +30,9 @@ export default function EditBusinessProfile({ listingId }) {
     businessname: "", businessCategory: "", businessSubCategory: [], services: [], businessArea: [], Building: "",
     Street: "", Area: "", Landmark: "", city: "", state: "", pincode: "", phone: "", about: "", image: null,
     images: [], email: "", experience: "", whatsapp: "", websiteURL: "", googlemap: "", facebook: "", instagram: "",
-    twitter: "", linkedin: "",
+    twitter: "", linkedin: "", faq: [{ question: "", answer: "" }],yib:'',
   });
+
   console.log("XXXXXXXXXXXXXlistingId:-", listingId);
 
 
@@ -48,6 +50,7 @@ export default function EditBusinessProfile({ listingId }) {
         Street: listingId.businessDetails?.street || "", Area: listingId.businessDetails?.area || "",
         Landmark: listingId.businessDetails?.landmark || "", city: listingId.businessDetails?.city || "",
         state: listingId.businessDetails?.state || "", pincode: listingId.businessDetails?.pinCode || "",
+        yib: listingId.businessDetails?.yib || "",
         // Business Category & Subcategory
         businessCategory: listingId.businessCategory?.category._id || "", businessSubCategory: listingId.businessCategory?.subCategory.map((item) => item._id) || [],
         // Images
@@ -63,6 +66,7 @@ export default function EditBusinessProfile({ listingId }) {
         twitter: listingId.upgradeListing?.twitter || "", linkedin: listingId.upgradeListing?.linkedin || "",
         // Experience (if applicable)
         experience: listingId.experience || "", image: null,
+        faq: listingId?.faq?.map((item) => ({ question: item?.question, answer: item?.answer }))
       });
     }
     setOldImage(listingId?.businessCategory?.businessImages || [],)
@@ -95,113 +99,95 @@ export default function EditBusinessProfile({ listingId }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-      const form = new FormData();
-      // Contact Person
-      form.append("contactPerson[userId]", listingId?.contactPerson?.userId);
-      form.append("contactPerson[title]", formData?.title);
-      form.append("contactPerson[firstName]", formData?.firstName);
-      form.append("contactPerson[lastName]", formData?.lastName);
-      form.append("contactPerson[contactNumber]", formData?.phone);
-      form.append("contactPerson[whatsappNumber]", formData?.whatsapp);
-      form.append("contactPerson[email]", formData?.email);
+    const form = new FormData();
+    // Contact Person
+    form.append("contactPerson[userId]", listingId?.contactPerson?.userId);
+    form.append("contactPerson[title]", formData?.title);
+    form.append("contactPerson[firstName]", formData?.firstName);
+    form.append("contactPerson[lastName]", formData?.lastName);
+    form.append("contactPerson[contactNumber]", formData?.phone);
+    form.append("contactPerson[whatsappNumber]", formData?.whatsapp);
+    form.append("contactPerson[email]", formData?.email);
 
-      // Business Details
-      form.append("businessDetails[businessName]", formData?.businessname);
-      form.append("businessDetails[building]", formData?.Building);
-      form.append("businessDetails[street]", formData?.Street);
-      form.append("businessDetails[area]", formData?.Area);
-      form.append("businessDetails[landmark]", formData?.Landmark);
-      form.append("businessDetails[city]", formData?.city);
-      form.append("businessDetails[state]", formData?.state);
-      form.append("businessDetails[pinCode]", formData?.pincode);
+    // Business Details
+    form.append("businessDetails[businessName]", formData?.businessname);
+    form.append("businessDetails[building]", formData?.Building);
+    form.append("businessDetails[street]", formData?.Street);
+    form.append("businessDetails[area]", formData?.Area);
+    form.append("businessDetails[landmark]", formData?.Landmark);
+    form.append("businessDetails[city]", formData?.city);
+    form.append("businessDetails[state]", formData?.state);
+    form.append("businessDetails[pinCode]", formData?.pincode);
+    form.append("businessDetails[yib]", formData?.yib);
 
-      // Business Category
-      form.append("businessCategory[category]", formData?.businessCategory);
+    // Business Category
+    form.append("businessCategory[category]", formData?.businessCategory);
 
-      (formData?.businessSubCategory || []).forEach((id, index) => {
-        form.append(`businessCategory[subCategory][${index}]`, id);
-      });
+    (formData?.businessSubCategory || []).forEach((id, index) => {
+      form.append(`businessCategory[subCategory][${index}]`, id);
+    });
 
-      (formData?.keywords || []).forEach((keyword, index) => {
-        form.append(`businessCategory[keywords][${index}]`, keyword);
-      });
+    (formData?.keywords || []).forEach((keyword, index) => {
+      form.append(`businessCategory[keywords][${index}]`, keyword);
+    });
 
-      (formData?.services || []).forEach((service, index) => {
-        form.append(`businessCategory[businessService][${index}]`, service);
-      });
+    (formData?.services || []).forEach((service, index) => {
+      form.append(`businessCategory[businessService][${index}]`, service);
+    });
 
-      (formData?.businessArea || []).forEach((area, index) => {
-        form.append(`businessCategory[serviceArea][${index}]`, area);
-      });
+    (formData?.businessArea || []).forEach((area, index) => {
+      form.append(`businessCategory[serviceArea][${index}]`, area);
+    });
 
-      form.append("businessCategory[about]", formData?.about);
+    if (formData?.faq) {
+      form.append(`faq`, JSON.stringify(formData?.faq));
+    }
+    form.append("businessCategory[about]", formData?.about);
 
-      // Business Images
-      (formData?.images || []).forEach((img, index) => {
-        if (typeof img === "string") {
-          form.append("businessImages", img);
-        } else if (img instanceof File) {
-          form.append("businessImages", img);
-        }
-      });
-
-      // Upgrade Listing
-      form.append("upgradeListing[direction]", formData?.googlemap);
-      form.append("upgradeListing[website]", formData?.websiteURL);
-      form.append("upgradeListing[facebook]", formData?.facebook);
-      form.append("upgradeListing[instagram]", formData?.instagram);
-      form.append("upgradeListing[linkedin]", formData?.linkedin);
-      form.append("upgradeListing[twitter]", formData?.twitter);
-
-      try {
-        const response = await axios.post(`http://localhost:5000/api/update-listings-by-id/${listingId?._id}`, form);
-        console.log("response:-", response)
-        if (response)
-          alert("Profile updated successfully!");
-      } catch (error) {
-        console.error("Error updating profile:", error);
-        alert("Failed to update profile");
+    // Business Images
+    (formData?.images || []).forEach((img, index) => {
+      if (typeof img === "string") {
+        form.append("businessImages", img);
+      } else if (img instanceof File) {
+        form.append("businessImages", img);
       }
-   
+    });
 
+    // Upgrade Listing
+    form.append("upgradeListing[direction]", formData?.googlemap);
+    form.append("upgradeListing[website]", formData?.websiteURL);
+    form.append("upgradeListing[facebook]", formData?.facebook);
+    form.append("upgradeListing[instagram]", formData?.instagram);
+    form.append("upgradeListing[linkedin]", formData?.linkedin);
+    form.append("upgradeListing[twitter]", formData?.twitter);
+
+    try {
+      const response = await axios.post(`http://localhost:5000/api/update-listings-by-id/${listingId?._id}`, form);
+      console.log("response:-", response)
+      if (response)
+        alert("Profile updated successfully!");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("Failed to update profile");
+    }
   };
 
-  // const handleBasicSubmit = async (e) => {
-  //   e.preventDefault();
-  //   const body = {
-  //     contactPerson: { userId: listingId?.contactPerson?.userId },
-  //     businessDetails: {
-  //       businessName: formData?.businessname, building: formData?.Building, street: formData?.Street,
-  //       area: formData?.Area, landmark: formData?.Landmark, city: formData?.city, state: formData?.state, pinCode: formData?.pincode,
-  //     },
-  //   }
+  const handleFAQChange = (e, index, field) => {
+    const updatedFaq = [...formData.faq];
+    updatedFaq[index][field] = e.target.value;
+    setFormData({ ...formData, faq: updatedFaq });
+  };
 
-  //   // const body2 = {
-  //   //   contactPerson:{userId:listingId?.contactPerson?.userId},
-  //   //   businessCategory: {
-  //   //     category: formData?.businessCategory, subCategory: formData?.businessSubCategory, keywords: formData?.keywords,
-  //   //     businessService: formData?.services, serviceArea: formData?.businessArea, about: formData?.about
-  //   //   }
-  //   // }
+  // To add a new FAQ entry
+  const handleAddFAQ = () => {
+    setFormData({ ...formData, faq: [...formData?.faq, { question: "", answer: "" }] });
+  };
 
-  //   // const body3 = {
-  //   //   contactPerson:{userId:listingId?.contactPerson?.userId},
-  //   //   upgradeListing: {
-  //   //     direction: formData?.googlemap, website: formData?.websiteURL, facebook: formData?.facebook,
-  //   //     instagram: formData?.instagram, linkedin: formData?.linkedin, twitter: formData?.twitter
-  //   //   }
-  //   // }
-
-  //   try {
-  //     const response = await axios.post(`http://localhost:5000/api/update-Business-Basic-Info-by-id/${listingId?._id}`, body);
-  //     console.log("response:-", response)
-  //     if (response)
-  //       alert("Profile updated successfully!");
-  //   } catch (error) {
-  //     console.error("Error updating profile:", error);
-  //     alert("Failed to update profile");
-  //   }
-  // };
+  // To remove a specific FAQ entry
+  const handleRemoveFAQ = (index) => {
+    const updatedFaq = formData.faq.filter((_, i) => i !== index);
+    setFormData({ ...formData, faq: updatedFaq });
+  };
 
 
   const [activeTab, setActiveTab] = useState("basic");
@@ -351,7 +337,7 @@ export default function EditBusinessProfile({ listingId }) {
               <div className="col-md-4">
                 <div className="edit-profile-field">
                   <label>Years In Business</label>
-                  <input type="text" name="experience" value={formData.experience} onChange={handleChange} />
+                  <input type="text" name="yib" value={formData.yib} onChange={handleChange} />
                 </div>
               </div>
             </div>
@@ -746,6 +732,49 @@ export default function EditBusinessProfile({ listingId }) {
           </form>
         );
 
+      case "faq":
+        return (
+          <form onSubmit={handleSubmit}>
+            {formData?.faq?.map((faq, index) => (
+              <div className="row align-items-center mb-3" key={index}>
+                <div className="col-md-4">
+                  <div className="edit-profile-field">
+                    <label>Question</label>
+                    <input type="text" name="question" value={faq.question} onChange={(e) => handleFAQChange(e, index, "question")} className="form-control" required />
+                  </div>
+                </div>
+                <div className="col-md-5">
+                  <div className="edit-profile-field">
+                    <label>Answer</label>
+                    <input type="text" name="answer" value={faq.answer} onChange={(e) => handleFAQChange(e, index, "answer")} className="form-control" required />
+                  </div>
+                </div>
+                {index !== 0 && (
+                  <div className="col-md-3 mt-4">
+                    <button type="button" className="btn btn-danger" onClick={() => handleRemoveFAQ(index)}>
+                      Remove
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+
+            <div className="mb-3">
+              <button type="button" className="btn btn-secondary" onClick={handleAddFAQ}>
+                Add More
+              </button>
+            </div>
+
+            <div className="mt-4">
+              <button type="submit" className="btn btn-primary me-2">
+                Save Changes
+              </button>
+              <button type="button" className="btn btn-outline-secondary" onClick={() => setActiveTab("")}>
+                Cancel
+              </button>
+            </div>
+          </form>
+        );
       default:
         return null;
     }

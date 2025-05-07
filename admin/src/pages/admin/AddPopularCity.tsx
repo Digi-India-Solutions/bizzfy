@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AdminLayout } from "@/components/Layout/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -9,54 +9,108 @@ import { useToast } from "@/components/ui/use-toast";
 import axios from "axios";
 import { ArrowLeft } from "lucide-react";
 
-const AddPopularCity = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    country: "India",
-    badge: "",
-    image: "",
-    color: "#6E59A5",
-    isActive: true
-  });
+// Types
+interface City {
+  _id: string;
+  name: string;
+}
 
+interface Category {
+  _id: string;
+  name: string;
+}
+
+const AddPopularCity = () => {
+  const [cityList, setCityList] = useState<City[]>([]);
+  const [categoryList, setCategoryList] = useState<Category[]>([]);
+  const [formData, setFormData] = useState({
+    banner: null as File | null,
+    city: "",
+    category: [] as string[],
+    color: "#6E59A5",
+    abouteCity: "",
+    isActive: true,
+  });
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    const fetchCity = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/city/get-all-city");
+        if (res?.data?.status) setCityList(res.data.data);
+      } catch (error) {
+        console.error("Failed to fetch cities:", error);
+      }
+    };
+
+    const fetchCategories = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/categories");
+        if (res?.status) setCategoryList(res.data);
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      }
+    };
+
+    fetchCity();
+    fetchCategories();
+  }, []);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, files } = e.target;
+    if (files && files[0]) {
+      setFormData((prev) => ({ ...prev, [name]: files[0] }));
+    }
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    setFormData(prev => ({ ...prev, [name]: checked }));
+    setFormData((prev) => ({ ...prev, isActive: e.target.checked }));
   };
 
-  // VITE_API_BASE_URL=http://localhost:5000/api/admin/cityRoutes1/add-multiple
+  const handleCategorySelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (value && !formData.category.includes(value)) {
+      setFormData((prev) => ({ ...prev, category: [...prev.category, value] }));
+    }
+  };
+
+  const removeCategory = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      category: prev.category.filter((_, i) => i !== index),
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
     try {
-      console.log("Submitting data:", formData);
+      const form = new FormData();
+      if (formData.banner) form.append("banner", formData.banner);
+      form.append("city", formData.city);
+      form.append("color", formData.color);
+      form.append("abouteCity", formData.abouteCity);
+      form.append("isActive", String(formData.isActive));
+      formData.category.forEach((cat) => form.append("category", cat));
 
-      const res = await axios.post(
-        "http://localhost:5000/api/admin/cityRoutes1/add-multiple",
-        formData
-        
-      );
-
-      toast({
-        title: "Success",
-        description: "City added successfully!",
-      });
+      const res = await axios.post("http://localhost:5000/api/populerCity/create-add", form);
+      console.log("resKKKK:-= " , res);
+      toast({ title: "Success", description: "City added successfully!" });
       navigate("/admin/popular-cities");
     } catch (error) {
-      console.error("Error adding city:", error);
+      console.error("Submission error:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to add city. Please try again.",
+        title: "Failed",
+        description: "Could not add city. Try again.",
       });
     } finally {
       setLoading(false);
@@ -78,41 +132,91 @@ const AddPopularCity = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="name">City Name *</Label>
-                  <Input id="name" name="name" value={formData.name} onChange={handleChange} required />
+                  <Label htmlFor="banner">Banner</Label>
+                  <Input id="banner" type="file" name="banner" onChange={handleFileChange} />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="country">Country *</Label>
-                  <Input id="country" name="country" value={formData.country} onChange={handleChange} required />
+                  <Label htmlFor="city">City *</Label>
+                  <select
+                    id="city"
+                    name="city"
+                    value={formData.city}
+                    onChange={handleInputChange}
+                    className="border px-3 py-2 rounded w-full"
+                    required
+                  >
+                    <option value="">Select a City</option>
+                    {cityList.map((city) => (
+                      <option key={city._id} value={city._id}>
+                        {city.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="badge">Badge</Label>
-                  <Input id="badge" name="badge" value={formData.badge} onChange={handleChange} />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="image">Image URL</Label>
-                  <Input id="image" name="image" value={formData.image} onChange={handleChange} />
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="category">Categories *</Label>
+                  <select
+                    id="category"
+                    onChange={handleCategorySelect}
+                    className="border px-3 py-2 rounded w-full"
+                  >
+                    <option value="">Select Category</option>
+                    {categoryList.map((cat) => (
+                      <option key={cat._id} value={cat._id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {formData.category.map((catId, index) => {
+                      const cat = categoryList.find((c) => c._id === catId);
+                      return (
+                        <span
+                          key={index}
+                          className="flex items-center gap-2 bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm"
+                        >
+                          {cat?.name || catId}
+                          <button
+                            type="button"
+                            onClick={() => removeCategory(index)}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            &times;
+                          </button>
+                        </span>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="color">Color</Label>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-center">
                     <input
                       type="color"
                       id="color"
                       name="color"
                       value={formData.color}
-                      onChange={handleChange}
+                      onChange={handleInputChange}
                       className="h-10 w-10 border rounded"
                     />
-                    <Input name="color" value={formData.color} onChange={handleChange} />
+                    <Input name="color" value={formData.color} onChange={handleInputChange} />
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 mt-6">
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="abouteCity">About City</Label>
+                  <Input
+                    id="abouteCity"
+                    name="abouteCity"
+                    value={formData.abouteCity}
+                    onChange={handleInputChange}
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 mt-6 md:col-span-2">
                   <input
                     type="checkbox"
                     id="isActive"

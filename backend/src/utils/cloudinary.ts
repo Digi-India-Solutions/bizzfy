@@ -11,6 +11,7 @@ cloudinary.config({
 export const uploadImage = async (file: string): Promise<string | null> => {
   try {
     const result = await cloudinary.uploader.upload(file);
+    console.log(result)
     return result.secure_url;
   } catch (error) {
     console.error("Cloudinary upload error:", error);

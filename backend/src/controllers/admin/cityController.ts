@@ -7,10 +7,10 @@ import { deleteLocalFile } from "../../utils/deleteImageFromLocalFolder";
 export const createCity = async (req: Request, res: Response) => {
   try {
     console.log("req.body", req.body);
-    const { name, state, color, topCity, badge, isActive } = req.body;
+    const { name, state, color, topCity, badge, isActive, pinCode } = req.body;
 
     // Check required fields
-    if (!name || !state || !color) {
+    if (!name || !state || !color || !pinCode) {
       return res.status(400).json({ error: "Name, state, and color are required" });
     }
 
@@ -25,6 +25,7 @@ export const createCity = async (req: Request, res: Response) => {
     }
 
     let imageUrl: string | null = null;
+    console.log("imageUrl", imageUrl, "req.file", req.file);
     if (req.file) {
       imageUrl = await uploadImage(req.file.path);
       deleteLocalFile(req.file.path);
@@ -32,8 +33,9 @@ export const createCity = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Image is required" });
     }
 
+
     const newCity = new City({
-      name, state, cityImage: imageUrl, badge, color, country: "INDIA", status: "active",
+      name, state, cityImage: imageUrl, badge, color, pinCode, country: "INDIA", status: "active",
       topCity: topCity || false,
       isActive: isActive || true
     });
@@ -96,7 +98,7 @@ export const getCityById = async (req: Request, res: Response) => {
 export const updateCity = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, state, color, topCity, badge, isActive } = req.body;
+    const { name, state, color, topCity, badge, isActive, pinCode } = req.body;
 
     if (!id) {
       return res.status(400).json({ error: "City ID is required" });
@@ -136,17 +138,14 @@ export const updateCity = async (req: Request, res: Response) => {
     city.state = state || city.state;
     city.color = color || city.color;
     city.badge = badge !== undefined ? badge : city.badge;
-    city.cityImage = imageUrl;
+    city.cityImage = imageUrl || city.cityImage;
+    city.pinCode = pinCode || city.pinCode;
     city.topCity = topCity !== undefined ? topCity : city.topCity;
     city.isActive = isActive !== undefined ? isActive : city.isActive;
 
     await city.save();
 
-    res.status(200).json({
-      status: true,
-      message: "City updated successfully",
-      city
-    });
+    res.status(200).json({ status: true, message: "City updated successfully", city });
   } catch (error) {
     console.error("Update City Error:", error);
     res.status(500).json({ error: "Failed to update city" });

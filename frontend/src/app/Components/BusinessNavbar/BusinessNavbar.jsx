@@ -217,14 +217,28 @@ const placeholderTexts = [
 const BusinessNavbar = () => {
   const router = useRouter();
   const navbarCollapseRef = useRef(null);
-
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [location, setLocation] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [animatedText, setAnimatedText] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Close navbar on outside click
+  useEffect(() => {
+    const token = localStorage.getItem("biziffyToken");
+    console.log("Token:", token);
+    setIsLoggedIn(!!token);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("biziffyToken");
+    localStorage.removeItem("biziffyUser");
+    setIsLoggedIn(false);
+    router.push("/Pages/login");
+  };
+
+
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -321,11 +335,7 @@ const BusinessNavbar = () => {
             </div>
 
             {/* Right links */}
-            <div
-              className="collapse navbar-collapse justify-content-end"
-              id="navbarSupportedContent"
-              ref={navbarCollapseRef}
-            >
+            {/* <div className="collapse navbar-collapse justify-content-end" id="navbarSupportedContent" ref={navbarCollapseRef}            >
               <div className="d-flex align-items-center">
                 <Link href="/Pages/login" className="btn bg-primary text-white me-2">
                   Sign In
@@ -334,7 +344,59 @@ const BusinessNavbar = () => {
                   Register
                 </Link>
               </div>
-            </div>
+            </div> */}
+
+            {!isLoggedIn ? (
+
+              <div className="d-flex align-items-center ">
+                <Link
+                  href="/Pages/login"
+                  className="btn btn bg-primary text-white me-2"
+                >
+                  SignIn
+                </Link>
+                <Link
+                  href="/Pages/signup"
+                  className="btn btn bg-dark text-white me-2"
+                >
+                  Register
+                </Link>
+              </div>
+            ) : (
+
+              <div className="dropdown">
+                <button
+                  className="btn border-0 d-flex align-items-center"
+                  type="button"
+                  id="profileDropdown"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                  style={{ backgroundColor: 'transparent' }}
+                >
+                  <i className="bi bi-person-circle fs-3 text-dark"></i>
+                </button>
+
+                <ul
+                  className="dropdown-menu dropdown-menu-end shadow-lg border-0"
+                  aria-labelledby="profileDropdown"
+                  style={{ minWidth: '150px' }}
+                >
+                  <li>
+                    <Link href="/Pages/Profile" className="dropdown-item d-flex align-items-center gap-2">
+                      <i className="bi bi-person"></i> Dashboard
+                    </Link>
+                  </li>
+                  <li>
+                    <button
+                      className="dropdown-item d-flex align-items-center gap-2 text-danger"
+                      onClick={handleLogout}
+                    >
+                      <i className="bi bi-box-arrow-right"></i> Logout
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            )}
           </div>
         </nav>
       </section>

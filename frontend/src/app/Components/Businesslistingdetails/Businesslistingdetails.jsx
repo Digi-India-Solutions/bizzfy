@@ -11,36 +11,12 @@ import "../../Pages/bussiness-listing/businessListing.css";
 import BusinessSimilarListing from "./BusinessSimilarListing";
 import DealOffers from "./DealOffers";
 import ListingPageFaq from "./ListingPageFaq";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const Businesslistingdetails = ({ businesses }) => {
+  const router = useRouter()
 
-  // const businesses = [
-  //   {
-  //     id: 1,
-  //     name: "Pasricha Clinic",
-  //     rating: 3.4,
-  //     reviews: 5,
-  //     address: "Shop 20, C S C II, Sector XIII, Rohini, Delhi",
-  //     phone: "+91 9810000000",
-  //     description: "Very polite and extremely knowledgeable doctor.",
-  //     image: gourav,
-  //     services: ["General Check-up", "Vaccination", "Health Consultation"],
-  //     servicesArea: ["Delhi", "Gurgaon", "Noida"],
-  //     reviewsData: [
-  //       {
-  //         author: "John Doe",
-  //         comment: "Excellent service and very polite staff.",
-  //       },
-  //       {
-  //         author: "Jane Smith",
-  //         comment: "The doctor is very knowledgeable and kind.",
-  //       },
-  //     ],
-  //   },
-  // ];
-
-  // Text Constants
-  // const fullText = { businesses?.businessCategory?.about };
   "Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusantium error, odio eos, nostrum animi quae facilis possimus consequatur id ipsum odit iure hic, debitis voluptas iusto eligendi tenetur nam omnis blanditiis quos magni porro? Dolore nostrum voluptatem dolorem natus totam tempore cum distinctio ea excepturi. Consectetur enim dolor ut ea dicta mollitia provident possimus placeat consequatur ab quasi neque laudantium recusandae aliquid nobis sapiente illum eum est reiciendis, rerum perspiciatis, corporis exercitationem. In voluptatum dignissimos quibusdam asperiores exercitationem nobis perferendis voluptate magnam alias beatae accusamus non reprehenderit adipisci placeat ex consequatur, unde eaque enim consequuntur debitis molestiae saepe officiis aut!";
   const words = businesses?.businessCategory?.about.split(" ");
   const wordLimit = 25;
@@ -134,18 +110,38 @@ const Businesslistingdetails = ({ businesses }) => {
     setIsOpen(isCurrentlyOpen(open, close));
   }, []);
 
-  // Get current day index for display
+  const handleCountClick = (type) => {
+    const businessId = businesses?._id;
+    if (!businessId || !type) return;
+
+    const key = `business_click_${businessId}_${type}`;
+    const lastClickDay = localStorage.getItem(key);
+    console.log(`lastClickDay`, lastClickDay);
+    const now = Date.now();
+    const currentDay = Math.floor(now / 86400000);
+    console.log(`currentDay`, currentDay);
+
+    if (!lastClickDay || parseInt(lastClickDay) < currentDay) {
+
+      axios.post(`http://localhost:5000/api/increase-click-count/${businessId}`, { type })
+        .then(() => { console.log(`${type} click counted`); localStorage.setItem(key, currentDay.toString()); })
+        .catch((err) => { console.error("Error increasing count", err) });
+    } else {
+      console.log(`${type} already clicked today — not counted`);
+    }
+  };
+
   const today = getCurrentDay();
-  console.log("XXXXXXXXDDDDDDD", businesses, selected)
+  console.log("XXXXXXXXDDDDDDD", businesses)
   return (
     <>
       <div className="container mt-4">
         <div className="row">
-          <Link href="/Pages/bussiness-listing">
-            <button className="black-btn px-4">
-              <i className="bi bi-arrow-left-short"></i> Back
-            </button>
-          </Link>
+          {/* <Link href="/Pages/bussiness-listing"> */}
+          <button className="black-btn px-4 " style={{ width: "120px" }} onClick={() => router.back()}>
+            <i className="bi bi-arrow-left-short"></i> Back
+          </button>
+          {/* </Link> */}
         </div>
       </div>
       <div className="container">
@@ -170,26 +166,50 @@ const Businesslistingdetails = ({ businesses }) => {
                 className="business-detail-image mb-3"
               />
               <div className="basic-li-detail d-flex flex-wrap mb-2 gap-2">
-                <Link href={`${businesses?.upgradeListing?.direction}`} className="business-listing-black-btn">
+                <Link
+                  href={`${businesses?.upgradeListing?.direction}`}
+                  onClick={() => handleCountClick('direction')}
+                  className="business-listing-black-btn"
+                >
                   <i className="bi bi-crosshair"></i> Direction
                 </Link>
-                <Link href={"#"} className="business-listing-black-btn">
+
+                <Link
+                  href={"#"}
+                  onClick={() => handleCountClick('share')}
+                  className="business-listing-black-btn"
+                >
                   <i className="bi bi-share"></i> Share
                 </Link>
-                <Link href={` tel:+91${businesses?.contactPerson?.contactNumber}`} className="business-listing-black-btn">
+
+                <Link
+                  href={`tel:+91${businesses?.contactPerson?.contactNumber}`}
+                  onClick={() => handleCountClick('contact')}
+                  className="business-listing-black-btn"
+                >
                   <i className="bi bi-telephone-outbound"></i> Contact
                 </Link>
-                <Link href={`${businesses?.upgradeListing?.website}`} className="business-listing-black-btn">
+
+                <Link
+                  href={`${businesses?.upgradeListing?.website}`}
+                  onClick={() => handleCountClick('website')}
+                  className="business-listing-black-btn"
+                >
                   <i className="bi bi-globe"></i> Website
                 </Link>
-                <Link href={`https://wa.me/${businesses.contactPerson?.whatsappNumber}`}
+
+                <Link
+                  onClick={() => handleCountClick('whatsapp')}
+                  href={`https://wa.me/${businesses.contactPerson?.whatsappNumber}`}
                   target="_blank"
-                  rel="noopener noreferrer" className="business-listing-black-btn">
+                  rel="noopener noreferrer"
+                  className="business-listing-black-btn"
+                >
                   <i className="bi bi-whatsapp"></i> Whatsapp
                 </Link>
               </div>
               <div className="d-flex gap-2 align-items-center mb-1">
-                <p>7 years in business</p>
+                <p>{businesses?.businessDetails?.yib || '0.6'} years in business</p>
                 <span>|</span>
                 <p>Karnal, Haryana</p>
               </div>
@@ -371,10 +391,14 @@ const Businesslistingdetails = ({ businesses }) => {
                       )}
                     </div>
                   </div>
-                  <hr />
-                  <div className="tab-pane">
-                    <ListingPageFaq />
-                  </div>
+                  {businesses?.faq?.length > 0 && (<>
+                    <hr />
+                    <div className="tab-pane">
+                      <ListingPageFaq faq={businesses?.faq} />
+                    </div>
+                  </>
+                  )}
+
                   <hr />
                   <div className="tab-pane">
                     <p>
@@ -440,7 +464,7 @@ const Businesslistingdetails = ({ businesses }) => {
                     }`}
                 >
                   <ul className="service-list list-unstyled">
-                    {businesses[0]?.services?.map((service, index) => (
+                    {businesses?.businessCategory?.keywords?.map((service, index) => (
                       <li key={index}>
                         <i className="bi bi-check2-all me-2"></i>
                         {service}
@@ -448,10 +472,7 @@ const Businesslistingdetails = ({ businesses }) => {
                     ))}
                   </ul>
                 </div>
-                <div
-                  className={`tab-pane fade ${activeTab === "review" ? "show active" : ""
-                    }`}
-                >
+                <div className={`tab-pane fade ${activeTab === "review" ? "show active" : ""}`}>
                   <p>
                     <b>Review Rating</b>
                   </p>

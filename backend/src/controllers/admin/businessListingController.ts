@@ -294,7 +294,7 @@ export const createBusinessDetails = async (req: Request, res: Response) => {
 export const getAllListings = async (req: Request, res: Response) => {
   try {
     const listings = await BusinessListing.find()
-      .sort({ createdAt: -1 }) 
+      .sort({ createdAt: -1 })
       .populate('businessCategory.category')
       .populate('businessCategory.subCategory')
 
@@ -386,6 +386,7 @@ export const updateAllListingsById = async (req: Request, res: Response) => {
         businessDetails: parsedDetails,
         businessCategory: parsedCategory,
         upgradeListing: parsedUpgrade,
+        faq: JSON.parse(req?.body?.faq) || req?.body?.faq
       },
       { new: true }
     );
@@ -540,45 +541,93 @@ export const getAllListingsByUserId = async (req: Request, res: Response) => {
 };
 
 export const searchBusinessListings = async (req: Request, res: Response) => {
-  const { query, pincode } = req.query;
-  // console.log("XXXXXXXX", query, pincode)
-  if (!pincode) {
-    return res.status(400).json({ error: "Query and pincode are required" });
+  const { query = "", pincode, title = '' } = req.query;
+
+  console.log("Incoming search:", { query, pincode, title });
+
+  if (!pincode || typeof pincode !== "string") {
+    return res.status(400).json({ status: false, error: "'pincode' is required." });
   }
 
   try {
     const regex = new RegExp(query as string, "i");
+    let listings: any[] = [];
 
-    const listings = await BusinessListing.find({
-      $and: [
-        {
-          $or: [
+    if (title === "CityPage") {
+      console.log("CityPage")
+      // Fetch all listings with the given pincode
+      const allByPincode = await BusinessListing.find({
+        "businessDetails.pinCode": pincode
+      }).populate("businessCategory.category businessCategory.subCategory");
 
-            { "businessDetails.businessName": regex },
-            { "businessCategory.about": regex },
-            { "businessCategory.keywords": regex },
-            { "businessCategory.businessService": regex },
-            { "businessCategory.serviceArea": regex },
-            // {
-            //   $expr: {
-            //     $regexMatch: {
-            //       input: { $concat: ["$contactPerson.firstName", " ", "$contactPerson.lastName"] },
-            //       regex: query,
-            //       options: "i",
-            //     },
-            //   },
-            // },
-          ],
-        },
-        { "businessDetails.pinCode": pincode }
-        // { "contactPerson.pinCode": pincode }
-      ]
-    }).populate("businessCategory.category businessCategory.subCategory");
-    console.log("XXXXXXXX", listings)
-    res.status(200).json({ status: true, data: listings });
-  } catch (error: unknown) {
-    const err = error as Error;
-    console.error("Search error:", err.message);
-    res.status(500).json({ status: false, message: "Internal server error", error: err.message, });
+      listings = allByPincode.filter((listing: any) => {
+        return (
+          listing?.businessCategory?.category?.name?.toLowerCase() === (query as string).toLowerCase()
+        );
+      });
+    } else {
+      console.log("CityPage console.log(CityPage)")
+      // General search by text query and pincode
+      listings = await BusinessListing.find({
+        $and: [
+          {
+            $or: [
+              { "businessDetails.businessName": regex },
+              { "businessCategory.about": regex },
+              { "businessCategory.keywords": { $in: [regex] } },
+              { "businessCategory.businessService": regex },
+              { "businessCategory.serviceArea": { $in: [regex] } }
+            ]
+          },
+          { "businessDetails.pinCode": pincode }
+        ]
+      }).populate("businessCategory.category businessCategory.subCategory");
+    }
+
+    // Only include Published or Approved listings
+    const filteredListings = listings.filter((listing: any) => {
+      const status = listing?.businessDetails?.status;
+      return status === "Published" || status === "Approved";
+    });
+
+    console.log("filteredListings",filteredListings)
+    return res.status(200).json({ status: true, data: filteredListings });
+  } catch (error: any) {
+    console.error("Search error:", error.message);
+    return res.status(500).json({ status: false, message: "Internal server error", error: error.message });
+  }
+};
+
+
+
+export const increaseClickCount = async (req: Request, res: Response) => {
+  try {
+    const allowedClickTypes = ['direction', 'share', 'contact', 'website', 'whatsapp', "listings"];
+    const { type } = req.body;
+    const businessId = req.params.id;
+
+    if (!type || !allowedClickTypes.includes(type)) {
+      return res.status(400).json({ status: false, message: "Invalid or missing click type." });
+    }
+
+    const business = await BusinessListing.findById(businessId);
+    if (!business) {
+      return res.status(404).json({ status: false, message: "Business not found." });
+    }
+
+    // Initialize clickCounts if undefined
+    if (!business.clickCounts) {
+      business.clickCounts = { direction: 0, share: 0, contact: 0, website: 0, whatsapp: 0, listings: 0 };
+    }
+
+    // Increment the correct count
+    business.clickCounts[type] += 1;
+
+    await business.save();
+
+    res.status(200).json({ status: true, message: `${type} click count updated successfully.`, updatedCounts: business.clickCounts, });
+  } catch (error: any) {
+    console.error("Click count update error:", error);
+    res.status(500).json({ status: false, message: error.message || "Server error" });
   }
 };

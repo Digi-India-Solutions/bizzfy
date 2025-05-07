@@ -423,8 +423,8 @@ export const AllListings = () => {
               <TableHead>Category</TableHead>
               <TableHead>User Name</TableHead>
               <TableHead>Created Date</TableHead>
-              <TableHead>Published Date</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>Published</TableHead>
+              <TableHead>Business Status</TableHead>
               <TableHead>Action</TableHead>
             </TableRow>
           </TableHeader>

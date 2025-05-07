@@ -1,62 +1,93 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AdminLayout } from "@/components/Layout/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Pencil, Plus, Search, Trash2 } from "lucide-react";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from "@/components/ui/table";
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle
 } from "@/components/ui/card";
-// import { City, getAllCities, deleteCity } from "@/backend/api/routes/cities";
 import { useToast } from "@/components/ui/use-toast";
+import axios from "axios";
+
+// ✅ Updated Type with nested city and categories
+interface City {
+  id: string;
+  banner?: string;
+  city: {
+    name: string;
+    country: string;
+    badge?: string;
+    cityImage?: string;
+    isActive: boolean;
+  };
+  category: {
+    _id: string;
+    name: string;
+    icon: string;
+  }[];
+}
 
 const PopularCities = () => {
   const [cities, setCities] = useState<City[]>([]);
   const [filteredCities, setFilteredCities] = useState<City[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchCities = async () => {
-      try {
-        const data = await getAllCities();
-        setCities(data);
-        setFilteredCities(data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching cities:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to load cities. Please try again.",
-        });
-        setLoading(false);
+  const fetchCities = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get("http://localhost:5000/api/populerCity/get-all-popular-cities");
+
+      if (response.data?.status && Array.isArray(response.data.data)) {
+        const normalized: City[] = response.data.data.map((item: any) => ({
+          id: item._id,
+          banner: item.banner,
+          city: {
+            name: item.city.name,
+            country: item.city.country,
+            badge: item.city.badge,
+            cityImage: item.city.cityImage,
+            isActive: item.city.isActive,
+          },
+          category: item.category?.map((cat: any) => ({
+            _id: cat._id,
+            name: cat.name,
+            icon: cat.icon,
+          })) || [],
+        }));
+        setCities(normalized);
+        setFilteredCities(normalized);
       }
-    };
-
-    fetchCities();
-  }, [toast]);
+    } catch (error) {
+      toast({ variant: "destructive", title: "Error", description: "Failed to load cities." });
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    if (searchTerm) {
+    fetchCities();
+  }, []);
+
+  useEffect(() => {
+    if (searchTerm.trim()) {
       setFilteredCities(
-        cities.filter(city => 
-          city.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          city.country.toLowerCase().includes(searchTerm.toLowerCase())
+        cities.filter(c =>
+          c.city.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          c.city.country.toLowerCase().includes(searchTerm.toLowerCase())
         )
       );
     } else {
@@ -68,19 +99,14 @@ const PopularCities = () => {
     setSearchTerm(e.target.value);
   };
 
-  const handleDelete = async (id: string, name: string) => {
-    if (window.confirm(`Are you sure you want to delete ${name}?`)) {
-      try {
-        await deleteCity(id);
-        setCities(prevCities => prevCities.filter(city => city.id !== id));
-      } catch (error) {
-        console.error("Error deleting city:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to delete city. Please try again.",
-        });
-      }
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this city?")) return;
+    try {
+      await axios.get(`http://localhost:5000/api/populerCity/delete-popular-city/${id}`);
+      setCities(prev => prev.filter(c => c.id !== id));
+      toast({ title: "Deleted", description: "City deleted successfully." });
+    } catch (err) {
+      toast({ variant: "destructive", title: "Error", description: "Failed to delete city." });
     }
   };
 
@@ -119,53 +145,55 @@ const PopularCities = () => {
             {loading ? (
               <div className="text-center py-4">Loading cities...</div>
             ) : (
-              <div className="rounded-md border">
+              <div className="rounded-md border overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[100px]">ID</TableHead>
-                      <TableHead>Name</TableHead>
+                      <TableHead>Banner</TableHead>
+                      <TableHead>City</TableHead>
                       <TableHead>Country</TableHead>
                       <TableHead>Badge</TableHead>
-                      <TableHead className="w-[100px] text-center">Status</TableHead>
+                      <TableHead>Categories</TableHead>
+                      <TableHead>Status</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredCities.length > 0 ? (
-                      filteredCities.map((city) => (
-                        <TableRow key={city.id}>
-                          <TableCell className="font-medium">{city.id}</TableCell>
+                      filteredCities.map((c) => (
+                        <TableRow key={c.id}>
                           <TableCell>
-                            <div className="font-medium">{city.name}</div>
+                            <img src={c.banner} alt="banner" className="h-10 w-16 object-cover rounded" />
                           </TableCell>
-                          <TableCell>{city.country}</TableCell>
-                          <TableCell>{city.badge || "—"}</TableCell>
-                          <TableCell className="text-center">
-                            <span 
+                          <TableCell>{c.city.name}</TableCell>
+                          <TableCell>{c.city.country}</TableCell>
+                          <TableCell>{c.city.badge || "—"}</TableCell>
+                          <TableCell>
+                            <div className="flex flex-wrap gap-1">
+                              {c.category.map(cat => (
+                                <span key={cat._id} className="bg-gray-200 text-xs px-2 py-1 rounded">
+                                  {cat.name}
+                                </span>
+                              ))}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <span
                               className={`px-2 py-1 rounded-full text-xs ${
-                                city.isActive 
-                                  ? "bg-green-100 text-green-800" 
+                                c.city.isActive
+                                  ? "bg-green-100 text-green-800"
                                   : "bg-red-100 text-red-800"
                               }`}
                             >
-                              {city.isActive ? "Active" : "Inactive"}
+                              {c.city.isActive ? "Active" : "Inactive"}
                             </span>
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
-                              <Button 
-                                size="sm" 
-                                variant="outline" 
-                                onClick={() => handleEdit(city.id)}
-                              >
+                              <Button size="sm" variant="outline" onClick={() => handleEdit(c.id)}>
                                 <Pencil className="h-4 w-4" />
                               </Button>
-                              <Button 
-                                size="sm" 
-                                variant="destructive" 
-                                onClick={() => handleDelete(city.id, city.name)}
-                              >
+                              <Button size="sm" variant="destructive" onClick={() => handleDelete(c.id)}>
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
@@ -174,7 +202,7 @@ const PopularCities = () => {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={6} className="h-24 text-center">
+                        <TableCell colSpan={7} className="h-24 text-center">
                           No cities found.
                         </TableCell>
                       </TableRow>

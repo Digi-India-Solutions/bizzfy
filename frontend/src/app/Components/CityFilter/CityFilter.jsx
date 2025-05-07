@@ -6,6 +6,7 @@ import "./cityFilter.css";
 import Link from "next/link";
 import Heading from "../Heading/SecHeading";
 import Image from "next/image";
+import axios from "axios";
 
 export default function CityCards() {
   const [cityData, setCityData] = useState([]);
@@ -14,12 +15,13 @@ export default function CityCards() {
   useEffect(() => {
     const fetchCities = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/admin/cities");
-        const data = await res.json();
-        console.log("Fetched cities:", data);
-
+        const res = await axios.get("http://localhost:5000/api/populerCity/get-all-popular-cities");
+        console.log("res->", res?.data);
+        if (res?.data?.status === true) {
+          setCityData(res?.data?.data);
+        }
         // Assuming the response contains a 'cities' array
-        setCityData(data || []);
+        // setCityData(res?.data?.data || []);
       } catch (err) {
         console.error("Error fetching cities:", err);
       }
@@ -37,10 +39,10 @@ export default function CityCards() {
 
       <div className="container">
         <div className="row g-4">
-          {cityData.length === 0 ? (
+          {cityData?.length === 0 ? (
             <p>Loading...</p>
           ) : (
-            cityData.map((city) => {
+            cityData?.map((city) => {
               console.log("City:", city); // Debug: Check city object
 
               return (
@@ -49,12 +51,12 @@ export default function CityCards() {
                     className={`cityCard ${hoveredCard === city._id ? "hovered" : ""}`}
                     onMouseEnter={() => setHoveredCard(city._id)}
                     onMouseLeave={() => setHoveredCard(null)}
-                    style={{ "--card-color": city.color }}
+                    style={{ "--card-color": city.city.color }}
                   >
                     <div className="cardImageContainer">
-                      <Image
-                        src={city.image || "/default-image.jpg"} // Use fallback image if city image is missing
-                        alt={`${city.name}, ${city.country}`}
+                      <img
+                        src={city.city.cityImage || "/default-image.jpg"} // Use fallback image if city image is missing
+                        alt={`${city.city.name}, ${city.city.country}`}
                         className="cardImage"
                         width={300}
                         height={200}
@@ -62,16 +64,16 @@ export default function CityCards() {
                       />
                       <div className="cardOverlay"></div>
                     </div>
-                      <div className="cardBadge">
+                    <div className="cardBadge">
                       <span>{city.badge || "New"}</span>
-                      </div>
+                    </div>
                     <div className="cardContent">
                       <div className="cardHeader">
-                        <h2 className="cityName">{city.name}</h2>
-                        <p className="countryName">{city.country}</p>
+                        <h2 className="cityName">{city?.city?.name}</h2>
+                        <p className="countryName">{city?.city?.country}</p>
                       </div>
                       <div className="cardFooter">
-                        <Link href="/pages/cityTourismGuide">
+                        <Link href={`/Pages/citytourismGuide/${city?._id}`}>
                           <button className="exploreButton">
                             <i className="bi bi-geo-alt me-1"></i>
                             <span>Explore</span>

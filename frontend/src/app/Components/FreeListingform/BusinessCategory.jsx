@@ -79,223 +79,237 @@ const BusinessCategory = ({ setKey, formData, setFormData }) => {
       setInput("");
     }
   };
-
+  console.log("BusinessCategory", {
+    category,
+    subCategory,
+    businessImages: bImage,
+    about,
+    keywords,
+    businessService: input,
+    serviceArea
+  })
   const handleSubmit = (e) => {
     e.preventDefault();
-    const updatedBusinessCategory = {
-      category,
-      subCategory,
-      businessImages: bImage,
-      about,
-      keywords,
-      businessService: input,
-      serviceArea
+
+    if (!category || !subCategory)
+      {
+        alert("Please select a subCategory.");
+        return;
+      }
+      const updatedBusinessCategory = {
+        category,
+        subCategory,
+        businessImages: bImage,
+        about,
+        keywords,
+        // businessService: input,
+        serviceArea
+      };
+
+      setFormData((prev) => ({
+        ...prev,
+        businessCategory: updatedBusinessCategory,
+      }));
+
+      setKey("timing");
     };
 
-    setFormData((prev) => ({
-      ...prev,
-      businessCategory: updatedBusinessCategory,
-    }));
+    const removeItem = (list, setList, item) =>
+      setList(list.filter((el) => el !== item));
 
-    setKey("timing");
+    const removeByIndex = (list, setList, index) =>
+      setList(list.filter((_, i) => i !== index));
+
+    const handleSelectArea = (area) => {
+      if (!serviceArea.includes(area)) {
+        setServiceArea([...serviceArea, area]);
+      }
+      setServiceAreaInput("");
+    };
+
+    const filteredAreas = areas.filter(
+      (area) =>
+        area.toLowerCase().includes(serviceAreainput.toLowerCase()) &&
+        !serviceArea.includes(area)
+    );
+
+    return (
+      <form onSubmit={handleSubmit}>
+        <h5 className="section-title">Select Business Category<sup>*</sup></h5>
+
+        <div className="mb-3">
+          <label className="form-label">Select Business Category <sup>*</sup></label>
+          <div className="relative">
+            <select
+              className="form-control"
+              required
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              <option value="">Select Your Category</option>
+              {categoryList.map((cat) => (
+                <option key={cat._id} value={cat._id}>{cat.name}</option>
+              ))}
+            </select>
+          </div>
+
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label">
+            Select Business SubCategory <sup>*</sup>
+          </label>
+
+          {/* Wrapper to prevent select overlap */}
+          <div className="position-relative">
+            <select
+              className="form-control"
+              // required
+              onChange={handleSubCategoryChange}
+              value={subCategory}
+            // style={{ height: 'auto', minHeight: '30px' }} 
+            >
+              <option value="">Select Your SubCategory</option>
+              {subCategoryList.map((cat) => (
+                <option key={cat._id} value={cat._id} >
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+
+            <i
+              className="bi bi-chevron-down"
+              style={{
+                position: 'absolute',
+                right: '15px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                pointerEvents: 'none',
+                color: '#6c757d'
+              }}
+            ></i>
+          </div>
+
+          {/* Display selected subcategories as badges */}
+          <div className="mt-2 d-flex flex-wrap">
+            {subCategory.map((cat) => (
+              <span key={cat} className="badge bg-primary m-1 d-flex align-items-center">
+                {subCategoryList.find((item) => item._id === cat)?.name || cat}
+                <button
+                  type="button"
+                  className="btn-close btn-close-white ms-2"
+                  onClick={() => removeItem(subCategory, setSubCategory, cat)}
+                  aria-label="Remove"
+                  style={{ filter: 'invert(1)' }} // Ensures visibility on colored badge
+                />
+              </span>
+            ))}
+          </div>
+        </div>
+
+
+        <div className="mb-3">
+          <label className="form-label">Business Services (press Enter to add)<sup>*</sup></label>
+          <input
+            type="text"
+            value={input}
+            className="form-control"
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Business Services"
+          />
+          <div className="mt-2">
+            {keywords.map((keyword, index) => (
+              <span key={index} className="badge bg-primary m-1 p-2">
+                {keyword}
+                <button
+                  type="button"
+                  className="btn-close ms-2 bg-danger"
+                  onClick={() => removeByIndex(keywords, setKeywords, index)}
+                  aria-label="Remove"
+                />
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="mb-3 position-relative">
+          <label className="form-label">Services Area/Pincode<sup>*</sup></label>
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Services Area/Pincode"
+            value={serviceAreainput}
+            onChange={(e) => setServiceAreaInput(e.target.value)}
+          />
+          {serviceAreainput && filteredAreas.length > 0 && (
+            <ul className="list-group position-absolute z-3 w-100">
+              {filteredAreas.map((area) => (
+                <li
+                  key={area}
+                  className="list-group-item list-group-item-action"
+                  onClick={() => handleSelectArea(area)}
+                  style={{ cursor: "pointer" }}
+                >
+                  {area}
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="mt-2">
+            {serviceArea.map((serarea) => (
+              <span key={serarea} className="badge bg-primary m-1 p-2">
+                {serarea}
+                <button
+                  type="button"
+                  className="btn-close ms-2 bg-danger"
+                  onClick={() => removeItem(serviceArea, setServiceArea, serarea)}
+                  aria-label="Remove"
+                />
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label">About Your Business <sup>*</sup></label>
+          <textarea
+            className="form-control"
+            rows="3"
+            placeholder="Write about your business..."
+            value={about}
+            onChange={(e) => setAbout(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label">Upload Business Photos <span className="text-danger">(Optional)</span></label>
+          <input
+            type="file"
+            className="form-control"
+            multiple
+            accept="image/*"
+            onChange={handleImageChange}
+          />
+          <div className="image-preview-container mt-2">
+            {businessImages.map((img, index) => (
+              <div key={index} className="image-preview d-inline-block position-relative me-2">
+                <img src={img} alt={`Preview ${index}`} className="img-thumbnail" />
+                <button
+                  type="button"
+                  className="btn-close position-absolute top-0 start-100 translate-middle bg-danger"
+                  onClick={() => removeByIndex(businessImages, setBusinessImages, index)}
+                  aria-label="Remove"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <button type="submit" className="btn btn-primary w-100 py-3">Next</button>
+      </form>
+    );
   };
 
-  const removeItem = (list, setList, item) =>
-    setList(list.filter((el) => el !== item));
-
-  const removeByIndex = (list, setList, index) =>
-    setList(list.filter((_, i) => i !== index));
-
-  const handleSelectArea = (area) => {
-    if (!serviceArea.includes(area)) {
-      setServiceArea([...serviceArea, area]);
-    }
-    setServiceAreaInput("");
-  };
-
-  const filteredAreas = areas.filter(
-    (area) =>
-      area.toLowerCase().includes(serviceAreainput.toLowerCase()) &&
-      !serviceArea.includes(area)
-  );
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <h5 className="section-title">Select Business Category<sup>*</sup></h5>
-
-      <div className="mb-3">
-        <label className="form-label">Select Business Category <sup>*</sup></label>
-        <div className="relative">
-          <select
-            className="form-control"
-            required
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
-            <option value="">Select Your Category</option>
-            {categoryList.map((cat) => (
-              <option key={cat._id} value={cat._id}>{cat.name}</option>
-            ))}
-          </select>
-        </div>
-
-      </div>
-
-      <div className="mb-3">
-        <label className="form-label">
-          Select Business SubCategory <sup>*</sup>
-        </label>
-
-        {/* Wrapper to prevent select overlap */}
-        <div className="position-relative">
-          <select
-            className="form-control"
-            required
-            onChange={handleSubCategoryChange}
-            value={subCategory}
-          // style={{ height: 'auto', minHeight: '30px' }} 
-          >
-            <option value="">Select Your SubCategory</option>
-            {subCategoryList.map((cat) => (
-              <option key={cat._id} value={cat._id} >
-                {cat.name}
-              </option>
-            ))}
-          </select>
-
-          <i
-            className="bi bi-chevron-down"
-            style={{
-              position: 'absolute',
-              right: '15px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              pointerEvents: 'none',
-              color: '#6c757d'
-            }}
-          ></i>
-        </div>
-
-        {/* Display selected subcategories as badges */}
-        <div className="mt-2 d-flex flex-wrap">
-          {subCategory.map((cat) => (
-            <span key={cat} className="badge bg-primary m-1 d-flex align-items-center">
-              {subCategoryList.find((item) => item._id === cat)?.name || cat}
-              <button
-                type="button"
-                className="btn-close btn-close-white ms-2"
-                onClick={() => removeItem(subCategory, setSubCategory, cat)}
-                aria-label="Remove"
-                style={{ filter: 'invert(1)' }} // Ensures visibility on colored badge
-              />
-            </span>
-          ))}
-        </div>
-      </div>
-
-
-      <div className="mb-3">
-        <label className="form-label">Business Services (press Enter to add)<sup>*</sup></label>
-        <input
-          type="text"
-          value={input}
-          className="form-control"
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Business Services"
-        />
-        <div className="mt-2">
-          {keywords.map((keyword, index) => (
-            <span key={index} className="badge bg-primary m-1 p-2">
-              {keyword}
-              <button
-                type="button"
-                className="btn-close ms-2 bg-danger"
-                onClick={() => removeByIndex(keywords, setKeywords, index)}
-                aria-label="Remove"
-              />
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <div className="mb-3 position-relative">
-        <label className="form-label">Services Area/Pincode<sup>*</sup></label>
-        <input
-          type="text"
-          className="form-control"
-          placeholder="Services Area/Pincode"
-          value={serviceAreainput}
-          onChange={(e) => setServiceAreaInput(e.target.value)}
-        />
-        {serviceAreainput && filteredAreas.length > 0 && (
-          <ul className="list-group position-absolute z-3 w-100">
-            {filteredAreas.map((area) => (
-              <li
-                key={area}
-                className="list-group-item list-group-item-action"
-                onClick={() => handleSelectArea(area)}
-                style={{ cursor: "pointer" }}
-              >
-                {area}
-              </li>
-            ))}
-          </ul>
-        )}
-        <div className="mt-2">
-          {serviceArea.map((serarea) => (
-            <span key={serarea} className="badge bg-primary m-1 p-2">
-              {serarea}
-              <button
-                type="button"
-                className="btn-close ms-2 bg-danger"
-                onClick={() => removeItem(serviceArea, setServiceArea, serarea)}
-                aria-label="Remove"
-              />
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <div className="mb-3">
-        <label className="form-label">About Your Business <sup>*</sup></label>
-        <textarea
-          className="form-control"
-          rows="3"
-          placeholder="Write about your business..."
-          value={about}
-          onChange={(e) => setAbout(e.target.value)}
-          required
-        />
-      </div>
-
-      <div className="mb-3">
-        <label className="form-label">Upload Business Photos <span className="text-danger">(Optional)</span></label>
-        <input
-          type="file"
-          className="form-control"
-          multiple
-          accept="image/*"
-          onChange={handleImageChange}
-        />
-        <div className="image-preview-container mt-2">
-          {businessImages.map((img, index) => (
-            <div key={index} className="image-preview d-inline-block position-relative me-2">
-              <img src={img} alt={`Preview ${index}`} className="img-thumbnail" />
-              <button
-                type="button"
-                className="btn-close position-absolute top-0 start-100 translate-middle bg-danger"
-                onClick={() => removeByIndex(businessImages, setBusinessImages, index)}
-                aria-label="Remove"
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <button type="submit" className="btn btn-primary w-100 py-3">Next</button>
-    </form>
-  );
-};
-
-export default BusinessCategory;
+  export default BusinessCategory;

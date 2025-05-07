@@ -45,7 +45,7 @@ import mongoose from "mongoose";
 import { Schema } from "mongoose";
 
 const ContactPersonSchema = new mongoose.Schema({
-  userId:{ type: Schema.Types.ObjectId, ref: "Auth", required: true, },
+  userId: { type: Schema.Types.ObjectId, ref: "Auth", required: true, },
   title: String,
   firstName: String,
   lastName: String,
@@ -72,7 +72,8 @@ const BusinessDetailsSchema = new mongoose.Schema({
     type: String,
     enum: ["Pending", "Published", "Unpublished",],
     default: "Pending",
-  }
+  },
+  yib: { type: String },
 });
 
 const TimingSchema = new mongoose.Schema({
@@ -103,6 +104,20 @@ const UpgradeListingSchema = new mongoose.Schema({
   twitter: { type: String },
 });
 
+const clickCountsSchema = new mongoose.Schema({
+  direction: { type: Number, default: 0 },
+  share: { type: Number, default: 0 },
+  contact: { type: Number, default: 0 },
+  website: { type: Number, default: 0 },
+  whatsapp: { type: Number, default: 0 },
+  listings: { type: Number, default: 0 },
+})
+
+const faqSchema = new mongoose.Schema({
+  question: { type: String },
+  answer: { type: String },
+})
+
 const BusinessListingSchema = new mongoose.Schema(
   {
     contactPerson: ContactPersonSchema,
@@ -110,7 +125,8 @@ const BusinessListingSchema = new mongoose.Schema(
     businessTiming: [TimingSchema],
     businessCategory: BusinessCategorySchema,
     upgradeListing: UpgradeListingSchema,
-
+    clickCounts: clickCountsSchema,
+    faq: [faqSchema],
   },
   { timestamps: true }
 );

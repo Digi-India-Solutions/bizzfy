@@ -4,7 +4,7 @@ import { upload } from "../../middleware/upload";
 import {
     getAllListings, createBusinessDetails, getAllListingsById, updateAllListingsById, deleteBusinessListing,
     updateBusinessListingStatus, changePublishStatus, listingBulkAction, getAllListingsByUserId,
-    searchBusinessListings
+    searchBusinessListings,increaseClickCount
 } from '../../controllers/admin/businessListingController';
 const router = express.Router();
 
@@ -23,6 +23,7 @@ router.post("/change-publish-status/:id", changePublishStatus)
 router.post("/listing-bulk-action", listingBulkAction)
 router.get("/get-all-listings-by-user-id/:id", getAllListingsByUserId)
 router.get("/search-listings", searchBusinessListings)
+router.post("/increase-click-count/:id", increaseClickCount)
 
 
 

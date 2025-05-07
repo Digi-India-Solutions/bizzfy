@@ -22,7 +22,6 @@ export const createState = async (req: Request, res: Response) => {
     let imageUrl: string | null = null;
     if (req.file) {
       imageUrl = await uploadImage(req.file.path);
-
       deleteLocalFile(req.file.path);
     }
     const state = new State({ name, stateImage: imageUrl, uniqueStateId: uniqueProductId });

@@ -108,6 +108,7 @@ const ListingDetails = () => {
       <Card className="mb-6">
         <CardContent className="p-6">
           {/* === BASIC INFO === */}
+
           <div className="mb-6">
             <h3 className="text-xl font-semibold mb-3">Basic Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -118,13 +119,13 @@ const ListingDetails = () => {
                 <p className="font-medium">Hide Phone Number:</p>
                 <input type="checkbox" checked={contactPerson.whatsappNumber || false} readOnly className="h-4 w-4" />
               </div> */}
-              <div><strong>Status:</strong> {businessDetails.status || "N/A"}</div>
-              <div><strong>Business Status:</strong> {businessDetails.publishedDate || "N/A"}</div>
+              <div><strong>Published:</strong> {businessDetails.publishedDate || "N/A"}</div>
+              <div><strong>Business Status:</strong> {businessDetails.status || "N/A"}</div>
               {/* <div><strong>Trust Status:</strong> {businessDetails.publishedDate || "N/A"}</div> */}
               {/* <div><strong>View Count:</strong> {businessDetails.viewCount || 0}</div> */}
               <div><strong>Created At:</strong> {listing?.createdAt ? new Date(listing?.createdAt).toLocaleDateString() : "N/A"}</div>
-              <div><strong>Updated At:</strong> {listing?.updatedAt ? new Date(listing?.updatedAt).toLocaleDateString() : "N/A"}</div>
-              <div><strong>Published Date:</strong> {listing?.createdAt ? new Date(listing?.createdAt).toLocaleDateString() : "N/A"}</div>
+              {/* <div><strong>Updated At:</strong> {listing?.updatedAt ? new Date(listing?.updatedAt).toLocaleDateString() : "N/A"}</div> */}
+              {/* <div><strong>Published Date:</strong> {listing?.createdAt ? new Date(listing?.createdAt).toLocaleDateString() : "N/A"}</div> */}
             </div>
           </div>
 
@@ -140,7 +141,7 @@ const ListingDetails = () => {
               <div><strong>City:</strong> {businessDetails.city || "N/A"}</div>
               <div><strong>State:</strong> {businessDetails.state || "N/A"}</div>
               <div><strong>Country:</strong> India</div>
-              <div><strong>Direction:</strong>{""}
+              {/* <div><strong>Direction:</strong>{""}
                 <a
                   href={upgradeListing.direction}
                   target="_blank"
@@ -148,8 +149,8 @@ const ListingDetails = () => {
                   className="text-blue-500 hover:underline"
                 >{upgradeListing.direction || "N/A"}
                 </a>
-              </div>
-              {upgradeListing.website && (
+              </div> */}
+              {/* {upgradeListing.website && (
                 <div>
                   <strong>Website:</strong>{" "}
                   <a
@@ -161,7 +162,7 @@ const ListingDetails = () => {
                     {upgradeListing.website}
                   </a>
                 </div>
-              )}
+              )} */}
             </div>
           </div>
 
@@ -206,34 +207,147 @@ const ListingDetails = () => {
           )}
 
           {/* === SERVICES === */}
-          {businessDetails.services && (
+          {businessCategory.keywords && businessCategory.keywords.length > 0 && (
             <div className="mb-6">
-              <h3 className="text-xl font-semibold mb-3">Services</h3>
-              <p>{businessDetails.services}</p>
-            </div>
-          )}
-
-          {/* Timings */}
-          {listing.businessTiming && (
-            <div className="mb-6">
-              <h3 className="text-xl font-semibold mb-3">Timings</h3>
-              <pre className="bg-gray-100 p-4 rounded-md overflow-auto">{JSON.stringify(listing.businessTiming, null, 2)}</pre>
+              <h3 className="text-xl font-semibold mb-3">Services / Keywords</h3>
+              <ul className="list-disc list-inside space-y-1">
+                {businessCategory.keywords.map((item, index) => (
+                  <li key={index}>{item}</li>
+                ))}
+              </ul>
             </div>
           )}
 
           {/* Contact */}
           {listing.contactPerson && (
             <div className="mb-6">
-              <h3 className="text-xl font-semibold mb-3">Contact Information</h3>
-              <pre className="bg-gray-100 p-4 rounded-md overflow-auto">{JSON.stringify(listing.contactPerson, null, 2)}</pre>
+              <h3 className="text-xl font-semibold mb-3">Contact Person</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <strong>Title:</strong> {listing.contactPerson.title || "N/A"}
+                </div>
+                <div>
+                  <strong>Name:</strong>{" "}
+                  {`${listing.contactPerson.firstName || ""} ${listing.contactPerson.lastName || ""
+                    }`}
+                </div>
+                <div>
+                  <strong>Phone:</strong> {listing.contactPerson.contactNumber || "N/A"}
+                </div>
+                <div>
+                  <strong>WhatsApp:</strong> {listing.contactPerson.whatsappNumber || "N/A"}
+                </div>
+                <div>
+                  <strong>Email:</strong> {listing.contactPerson.email || "N/A"}
+                </div>
+              </div>
             </div>
           )}
+
+          {/* Timings */}
+          {Array.isArray(listing.businessTiming) && listing.businessTiming.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-xl font-semibold mb-3">Business Timings</h3>
+              <table className="w-full border border-gray-200 rounded-md">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="p-2 text-left">Day</th>
+                    <th className="p-2 text-left">Open</th>
+                    <th className="p-2 text-left">Close</th>
+                    <th className="p-2 text-left">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {listing.businessTiming.map((timing, index) => (
+                    <tr key={index} className="border-t">
+                      <td className="p-2">{timing.day}</td>
+                      <td className="p-2">
+                        {timing.isOpen
+                          ? `${timing.openTime} ${timing.openPeriod}`
+                          : "—"}
+                      </td>
+                      <td className="p-2">
+                        {timing.isOpen
+                          ? `${timing.closeTime} ${timing.closePeriod}`
+                          : "—"}
+                      </td>
+                      <td className="p-2">
+                        {timing.isOpen ? (
+                          <span className="text-green-600 font-medium">Open</span>
+                        ) : (
+                          <span className="text-red-500 font-medium">Closed</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
 
           {/* Upgrade */}
           {listing.upgradeListing && (
             <div className="mb-6">
-              <h3 className="text-xl font-semibold mb-3">Upgrade Information</h3>
-              <pre className="bg-gray-100 p-4 rounded-md overflow-auto">{JSON.stringify(listing.upgradeListing, null, 2)}</pre>
+              <h3 className="text-xl font-semibold mb-3">Online Presence</h3>
+              <div className="flex flex-wrap gap-4">
+                {listing.upgradeListing.website && (
+                  <a
+                    href={listing.upgradeListing.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline"
+                  >
+                    🌐 Website
+                  </a>
+                )}
+                {listing.upgradeListing.facebook && (
+                  <a
+                    href={listing.upgradeListing.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline"
+                  >
+                    📘 Facebook
+                  </a>
+                )}
+                {listing.upgradeListing.instagram && (
+                  <a
+                    href={listing.upgradeListing.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-pink-500 hover:underline"
+                  >
+                    📸 Instagram
+                  </a>
+                )}
+                {listing.upgradeListing.linkedin && (
+                  <a
+                    href={listing.upgradeListing.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-700 hover:underline"
+                  >
+                    💼 LinkedIn
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+
+          {businessCategory?.businessImages?.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-xl font-semibold mb-3">Business Images</h3>
+              <div className="flex space-x-4 overflow-x-auto">
+                {businessCategory.businessImages.map((img, index) => (
+                  <img
+                    key={index}
+                    src={img}
+                    alt={`Business Image ${index + 1}`}
+                    className="w-48 h-32 object-cover rounded-md shadow"
+                  />
+                ))}
+              </div>
             </div>
           )}
         </CardContent>

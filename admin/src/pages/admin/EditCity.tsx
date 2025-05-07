@@ -29,6 +29,7 @@ const EditCity = () => {
     name: "",
     state: "",
     badge: "",
+    pinCode: "",
     image: null,
     color: "#9b87f5",
     topCity: false,
@@ -55,6 +56,7 @@ const EditCity = () => {
             state: city.state || "",
             badge: city.badge || "",
             image: null,
+            pinCode: city.pinCode || "",
             color: city.color || "#9b87f5",
             topCity: city.topCity || false,
             isActive: city.isActive || false,
@@ -101,6 +103,7 @@ const EditCity = () => {
     form.append("state", formData.state);
     form.append("badge", formData.badge);
     form.append("color", formData.color);
+    form.append("pinCode", formData.pinCode);
     form.append("topCity", formData.topCity.toString());
     form.append("isActive", formData.isActive.toString());
     if (formData.image) form.append("image", formData.image);
@@ -228,6 +231,16 @@ const EditCity = () => {
                       Selected: <strong>{formData.name}</strong>
                     </p>
                   )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="badge">pinCode</Label>
+                  <Input
+                    id="pinCode"
+                    name="pinCode"
+                    value={formData.pinCode}
+                    onChange={handleChange}
+                    placeholder="pinCode"
+                  />
                 </div>
 
                 {/* Badge */}
