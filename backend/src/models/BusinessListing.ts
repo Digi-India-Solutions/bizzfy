@@ -104,13 +104,18 @@ const UpgradeListingSchema = new mongoose.Schema({
   twitter: { type: String },
 });
 
-const clickCountsSchema = new mongoose.Schema({
-  direction: { type: Number, default: 0 },
-  share: { type: Number, default: 0 },
-  contact: { type: Number, default: 0 },
-  website: { type: Number, default: 0 },
-  whatsapp: { type: Number, default: 0 },
-  listings: { type: Number, default: 0 },
+const ClickDetailSchema = new mongoose.Schema({
+  count: { type: Number, default: 0 },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "Auth", default: '' },
+});
+
+const ClickCountsSchema = new mongoose.Schema({
+  direction: ClickDetailSchema,
+  share: ClickDetailSchema,
+  contact: ClickDetailSchema,
+  website: ClickDetailSchema,
+  whatsapp: ClickDetailSchema,
+  listings: ClickDetailSchema,
 })
 
 const faqSchema = new mongoose.Schema({
@@ -125,7 +130,8 @@ const BusinessListingSchema = new mongoose.Schema(
     businessTiming: [TimingSchema],
     businessCategory: BusinessCategorySchema,
     upgradeListing: UpgradeListingSchema,
-    clickCounts: clickCountsSchema,
+    // clickCounts: clickCountsSchema,
+    clickCounts: { type: ClickCountsSchema },
     faq: [faqSchema],
   },
   { timestamps: true }

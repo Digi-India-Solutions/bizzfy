@@ -527,7 +527,12 @@ export const getAllListingsByUserId = async (req: Request, res: Response) => {
 
     const listings = await BusinessListing.find({ "contactPerson.userId": userId })
       .populate("businessCategory.category")
-      .populate("businessCategory.subCategory");
+      .populate("businessCategory.subCategory")
+      .populate("clickCounts.direction.user")
+      .populate("clickCounts.share.user")
+      .populate("clickCounts.contact.user")
+      .populate("clickCounts.whatsapp.user")
+      .populate("clickCounts.listings.user");
 
     if (!listings || listings.length === 0) {
       return res.status(404).json({ status: false, message: "No listings found for this user.", });
@@ -590,7 +595,7 @@ export const searchBusinessListings = async (req: Request, res: Response) => {
       return status === "Published" || status === "Approved";
     });
 
-    console.log("filteredListings",filteredListings)
+    console.log("filteredListings", filteredListings)
     return res.status(200).json({ status: true, data: filteredListings });
   } catch (error: any) {
     console.error("Search error:", error.message);
@@ -599,15 +604,18 @@ export const searchBusinessListings = async (req: Request, res: Response) => {
 };
 
 
-
 export const increaseClickCount = async (req: Request, res: Response) => {
   try {
-    const allowedClickTypes = ['direction', 'share', 'contact', 'website', 'whatsapp', "listings"];
-    const { type } = req.body;
+    const allowedClickTypes = ["direction", "share", "contact", "website", "whatsapp", "listings"];
+    const { type, user } = req.body;
     const businessId = req.params.id;
 
     if (!type || !allowedClickTypes.includes(type)) {
       return res.status(400).json({ status: false, message: "Invalid or missing click type." });
+    }
+
+    if (!user) {
+      return res.status(400).json({ status: false, message: "Missing userId in body." });
     }
 
     const business = await BusinessListing.findById(businessId);
@@ -615,19 +623,33 @@ export const increaseClickCount = async (req: Request, res: Response) => {
       return res.status(404).json({ status: false, message: "Business not found." });
     }
 
-    // Initialize clickCounts if undefined
+    // Initialize clickCounts object and ensure all keys exist
     if (!business.clickCounts) {
-      business.clickCounts = { direction: 0, share: 0, contact: 0, website: 0, whatsapp: 0, listings: 0 };
+      business.clickCounts = {};
     }
 
-    // Increment the correct count
-    business.clickCounts[type] += 1;
+    for (const clickType of allowedClickTypes) {
+      if (!business.clickCounts[clickType]) {
+        business.clickCounts[clickType] = {
+          count: 0,
+          user: user // Initialize with current user to avoid validation error
+        };
+      }
+    }
+
+    // Now safely increment the specific type
+    business.clickCounts[type].count += 1;
+    business.clickCounts[type].user = user;
 
     await business.save();
 
-    res.status(200).json({ status: true, message: `${type} click count updated successfully.`, updatedCounts: business.clickCounts, });
+    return res.status(200).json({
+      status: true,
+      message: `${type} click count incremented.`,
+      updatedCounts: business.clickCounts[type],
+    });
   } catch (error: any) {
-    console.error("Click count update error:", error);
-    res.status(500).json({ status: false, message: error.message || "Server error" });
+    console.error("Click count error:", error);
+    return res.status(500).json({ status: false, message: error.message || "Server error." });
   }
 };

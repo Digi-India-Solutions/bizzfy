@@ -25,6 +25,8 @@ import dealRoutes from "./routes/admin/dealRoutes";
 import collectionRoutes from "./routes/admin/collectionRoutes";
 import stateRoutes from "./routes/admin/stateRoutes";
 import populerCityRoutes from "./routes/admin/populerCitysRoutes";
+import pinCodeRoutes from "./routes/admin/pinCodeRoutes"
+import contactRoutes from "./routes/admin/contactRoutes"
 
 // hm yaha per all listiing ka data import kr rhe hai
 import businessListingRoutes from "./routes/admin/businessListingRoutes";
@@ -67,7 +69,7 @@ app.use("/api", categoryRoutes);
 app.use("/api/admin", subcategoryRoutes);
 app.use("/api/admin", userRoutes);
 app.use("/api/admin", deactivateUserRoutes);
-// app.use("/api/admin/contacts", contactRoutes);
+app.use("/api/contactus", contactRoutes);
 app.use("/api/departments", departmentRoutes);
 app.use("/api/admin", supportTicketRoutes);
 app.use("/api/enquiries", enquiryRoutes);
@@ -80,6 +82,7 @@ app.use("/api/admin", dealRoutes);
 app.use("/api/admin", collectionRoutes);
 app.use("/api/state", stateRoutes);
 app.use("/api/populerCity", populerCityRoutes);
+app.use("/api/pincode" ,pinCodeRoutes)
 
 app.use("/api/admin", businessListingRoutes); // this makes /api/admin/business and /api/admin/contact work
 

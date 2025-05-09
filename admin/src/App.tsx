@@ -53,6 +53,9 @@ import EditSubCategory from "./pages/admin/EditSubCategory";
 import AllStates from "./pages/admin/AllStates";
 import CreateStates from "./pages/admin/CreateStates";
 import EditStates from "./pages/admin/EditState";
+import AllPinCode from "./pages/admin/AllPinCode";
+import CreatePinCode from "./pages/admin/CreatePinCode";
+import EditPinCode from "./pages/admin/EditPinCode";
 
 
 const queryClient = new QueryClient();
@@ -108,6 +111,11 @@ const App = () => (
             <Route path="/admin/popular-cities" element={<ProtectedRoute><PopularCities /></ProtectedRoute>} />
             <Route path="/admin/popular-cities/add" element={<ProtectedRoute><AddPopularCity /></ProtectedRoute>} />
             <Route path="/admin/popular-cities/edit/:id" element={<ProtectedRoute><EditPopularCity /></ProtectedRoute>} />
+            {/* PinCode Management Routes */}
+            <Route path="/admin/pincode" element={<ProtectedRoute><AllPinCode /></ProtectedRoute>} />
+            <Route path="/admin/pincode/create" element={<ProtectedRoute><CreatePinCode /></ProtectedRoute>} />
+            <Route path="admin/pincode/edit/:id" element={<ProtectedRoute><EditPinCode /></ProtectedRoute>} />
+
             <Route path="/admin/collections" element={<ProtectedRoute><Collections /></ProtectedRoute>} />
             <Route path="/admin/collections/add" element={<ProtectedRoute><AddCollection /></ProtectedRoute>} />
             <Route path="/admin/collections/edit/:id" element={<ProtectedRoute><EditCollection /></ProtectedRoute>} />

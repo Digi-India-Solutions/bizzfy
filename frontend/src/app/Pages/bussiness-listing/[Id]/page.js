@@ -8,13 +8,14 @@ import { useParams } from "next/navigation";
 const page = ({ params }) => {
   const { Id } = use(params);
   const [businesses, setBusinesses] = useState([]);
-  console.log("Received ID:", Id);
+ 
+  // console.log("Received ID:", Id);
 
   useEffect(() => {
     const fetchBusinessDetails = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/api/get-all-listings-by-id/${Id}`);
-        console.log("API Response:", response.data);
+        // console.log("API Response:", response.data);
         if (response.status) {
           setBusinesses(response?.data?.data);
         }
@@ -27,6 +28,9 @@ const page = ({ params }) => {
       fetchBusinessDetails()
     }
   }, [Id]);
+
+
+
 
   return (
     <>

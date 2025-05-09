@@ -121,7 +121,7 @@ const PopularCities = () => {
           <h1 className="text-2xl font-bold">Manage Popular Cities</h1>
           <Button onClick={() => navigate("/admin/popular-cities/add")}>
             <Plus className="h-4 w-4 mr-2" />
-            Add New City
+            Add New Popular Cities
           </Button>
         </div>
 

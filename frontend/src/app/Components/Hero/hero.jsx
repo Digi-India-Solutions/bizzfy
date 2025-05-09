@@ -90,7 +90,7 @@ const Hero = () => {
                       onChange={(e) => setSearchText(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
-                          e.preventDefault(); 
+                          e.preventDefault();
                           if (searchText.trim() && location?.pincode) {
                             router.push(`/Pages/bussiness-listing?query=${searchText?.trim()}&pincode=${location.pincode}`);
                           } else {
@@ -110,7 +110,7 @@ const Hero = () => {
                   <Link href="#" className="herobutton1">
                     List Your Website
                   </Link>
-                  <Link href="/Pages/free-listing" className="herobutton2">
+                  <Link href="/Pages/freelistingform" className="herobutton2">
                     List Your Business
                   </Link>
                 </div>

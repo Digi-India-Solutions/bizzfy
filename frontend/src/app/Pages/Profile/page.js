@@ -11,7 +11,9 @@ import { toast, ToastContainer } from "react-toastify";
 import Head from "next/head";
 import axios from "axios";
 import Dashboard from "../../Components/Dashboard/Dashboard"
+import { useRouter } from "next/navigation";
 const ProfilePage = () => {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState("overview");
   const [userId, setUserId] = useState("");
   const [profileData, setProfileData] = useState({});
@@ -452,6 +454,11 @@ const ProfilePage = () => {
                 <div className="profile-plan-table">
                   <div className="d-flex justify-content-between align-items-center">
                     <h3>My Listing</h3>
+                    <div>
+                      <button className="btn btn-primary" onClick={() => router?.push("/Pages/freelistingform")}>
+                        <i className="bi bi-pencil-square"></i> Add New Business
+                      </button>
+                    </div>
                   </div>
                   <hr />
                   <ToastContainer />
@@ -528,11 +535,11 @@ const ProfilePage = () => {
               )}
               {activeTab === "dashboard" && (
                 <>
-                  <Dashboard />
+                  <Dashboard businessListing={businessListing} />
                 </>
               )}
 
-            
+
             </div>
           </div>
         </div>

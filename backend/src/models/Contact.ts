@@ -1,13 +1,36 @@
 import mongoose from "mongoose";
 
-const contactSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
-  contactNumber: { type: String, required: true },
-  alternateNumbers: [{ type: String }], // optional
-  whatsappNumber: { type: String, required: true },
-  email: { type: String, required: true },
-});
+const contactSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true,
+    },
+    inquiryType: {
+      type: String,
+      required: true,
+      enum: ["general", "partnership", "advertising", "support"],
+    },
+    phone: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    city: {
+      type: String,
+      trim: true,
+    },
+  },
+  {
+    timestamps: true, 
+  }
+);
 
-export default mongoose.model("Contact", contactSchema);
+export default mongoose.models.Contact || mongoose.model("Contact", contactSchema);

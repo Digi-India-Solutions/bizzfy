@@ -407,13 +407,13 @@ export const Sidebar = () => {
                 >
                   <div className="flex items-center">
                     <Building2 className="h-5 w-5 mr-3" />
-                    <span>Citys/Top City</span>
+                    <span>State/Cities Manage</span>
                   </div>
                   {openCitiesManage ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                 </button>
                 {openCitiesManage && (
                   <ul className="ml-6 mt-1 space-y-1">
-                    {/* <li>
+                    <li>
                       <Link
                         to="/admin/state"
                         className={cn(
@@ -425,7 +425,20 @@ export const Sidebar = () => {
                         All State
                       </Link>
                     </li>
+
                     <li>
+                      <Link
+                        to="/admin/pincode"
+                        className={cn(
+                          "flex items-center px-4 py-2 text-gray-700 rounded-md hover:bg-blue-50 hover:text-blue-600",
+                          isActive("/admin/pincode") && location.pathname !== '/admin/pincode/create' && "bg-blue-50 text-blue-600"
+                        )}
+                      >
+                        <Building2 className="h-4 w-4 mr-2" />
+                        All pinCode
+                      </Link>
+                    </li>
+                    {/* <li>
                       <Link
                         to="/admin/state/create"
                         className={cn(
@@ -449,7 +462,7 @@ export const Sidebar = () => {
                         All Cities
                       </Link>
                     </li>
-                    <li>
+                    {/* <li>
                       <Link
                         to="/admin/cities/create"
                         className={cn(
@@ -458,9 +471,9 @@ export const Sidebar = () => {
                         )}
                       >
                         <MapPin className="h-4 w-4 mr-2" />
-                        Create City
+                        Create Cities
                       </Link>
-                    </li>
+                    </li> */}
 
                     <li>
                       <Link
@@ -474,7 +487,7 @@ export const Sidebar = () => {
                         All Popular Cities
                       </Link>
                     </li>
-                    <li>
+                    {/* <li>
                       <Link
                         to="/admin/popular-cities/add"
                         className={cn(
@@ -483,9 +496,9 @@ export const Sidebar = () => {
                         )}
                       >
                         <Building2 className="h-4 w-4 mr-2" />
-                        Add Popular City
+                        Add Popular Cities
                       </Link>
-                    </li>
+                    </li> */}
                   </ul>
                 )}
               </li>

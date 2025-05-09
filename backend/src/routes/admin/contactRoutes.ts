@@ -4,6 +4,6 @@ import { createContact, getAllContacts } from "../../controllers/admin/contactCo
 const router = express.Router();
 
 router.get("/", getAllContacts);       // For frontend fetch
-router.post("/", createContact);       // For Postman or form submission
+router.post("/create-contact", createContact);       // For Postman or form submission
 
 export default router;

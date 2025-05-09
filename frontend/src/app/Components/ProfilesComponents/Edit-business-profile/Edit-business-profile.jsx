@@ -17,8 +17,8 @@ const categories = [
 
 export default function EditBusinessProfile({ listingId }) {
   // ====== Api Data ========
-  const [selectedSubCategories, setSelectedSubCategories] = useState([]);
-  const [services, setServices] = useState([]);
+  // const [selectedSubCategories, setSelectedSubCategories] = useState([]);
+  // const [services, setServices] = useState([]);
   const [serviceInput, setServiceInput] = useState("");
   const [oldImage, setOldImage] = useState([]);
   const [serviceAreaInput, setServiceAreaInput] = useState("");
@@ -251,33 +251,36 @@ export default function EditBusinessProfile({ listingId }) {
     });
   };
 
-  useEffect(() => {
-    const fetchAreas = async () => {
-      try {
-        const res = await axios.get("https://6800d7ffb72e9cfaf728eac6.mockapi.io/areapincode");
-        const areaList = res.data.map((user) => `${user.area} ${user.pincode}`);
-        setAreas(areaList);
-      } catch (error) {
-        console.error("Error fetching areas:", error);
-      }
-    };
-    fetchAreas();
-  }, []);
+  // useEffect(() => {
+  //   const fetchAreas = async () => {
+  //     try {
+  //       const res = await axios.get("https://6800d7ffb72e9cfaf728eac6.mockapi.io/areapincode");
+  //       const areaList = res.data.map((user) => `${user.area} ${user.pincode}`);
+  //       setAreas(areaList);
+  //     } catch (error) {
+  //       console.error("Error fetching areas:", error);
+  //     }
+  //   };
+  //   fetchAreas();
+  // }, []);
 
 
 
-  useEffect(() => {
-    const fetchAreas = async () => {
-      try {
-        const res = await axios.get("https://6800d7ffb72e9cfaf728eac6.mockapi.io/areapincode");
-        const areaList = res.data.map((item) => `${item.area} ${item.pincode}`);
-        setAreas(areaList);
-      } catch (error) {
-        console.error("Error fetching areas:", error);
-      }
-    };
-    fetchAreas();
-  }, []);
+ useEffect(() => {
+     const fetchAreas = async () => {
+       try {
+         const res = await axios.get(`http://localhost:5000/api/pincode/get-areapincode-by-state`, {
+           params: { state: formData?.state }
+         });
+         console.log("DADAhhh", res?.data)
+         const areaList = res.data.map((user) => `${user.area} ${user.pinCode}`);
+         setAreas(areaList);
+       } catch (error) {
+         console.error("Error fetching areas:", error);
+       }
+     };
+     fetchAreas();
+   }, [formData.state]);
 
   const filteredAreas = areas.filter(
     (area) =>
@@ -614,7 +617,7 @@ export default function EditBusinessProfile({ listingId }) {
                     <button
                       type="button"
                       className="btn-close ms-2 bg-danger"
-                      onClick={() => removeItem(serArea)}
+                      onClick={() => removeAreaItem(serArea)}
                       aria-label="Remove"
                     />
                   </span>

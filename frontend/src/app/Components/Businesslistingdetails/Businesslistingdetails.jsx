@@ -46,6 +46,7 @@ const Businesslistingdetails = ({ businesses }) => {
   const [activeTab, setActiveTab] = useState("overview");
   const [showAllHours, setShowAllHours] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [user, setUser] = useState('')
 
   // Derived Values
   const visiblePhotos = showAll ? staticPhotos : staticPhotos.slice(0, 4);
@@ -58,9 +59,10 @@ const Businesslistingdetails = ({ businesses }) => {
   const handleAddReview = () => {
     if (newReview.author && newReview.comment) {
       const updatedReviews = [...reviews, newReview];
-      setReviews(updatedReviews); // Update state
-      setNewReview({ author: "", comment: "", rating: 0 }); // Clear form
-      setShowForm(false); // Optionally close form
+      setReviews(updatedReviews);
+      setNewReview({ author: "", comment: "", rating: 0 });
+      console.log("updatedReviews:--", updatedReviews);
+      setShowForm(false);
     }
   };
 
@@ -110,6 +112,12 @@ const Businesslistingdetails = ({ businesses }) => {
     setIsOpen(isCurrentlyOpen(open, close));
   }, []);
 
+  useEffect(() => {
+    const user = localStorage.getItem("biziffyUser");
+    console.log('USER:-', JSON.parse(user)._id)
+    setUser(JSON.parse(user)._id)
+  }, [])
+
   const handleCountClick = (type) => {
     const businessId = businesses?._id;
     if (!businessId || !type) return;
@@ -123,7 +131,7 @@ const Businesslistingdetails = ({ businesses }) => {
 
     if (!lastClickDay || parseInt(lastClickDay) < currentDay) {
 
-      axios.post(`http://localhost:5000/api/increase-click-count/${businessId}`, { type })
+      axios.post(`http://localhost:5000/api/increase-click-count/${businessId}`, { type, user })
         .then(() => { console.log(`${type} click counted`); localStorage.setItem(key, currentDay.toString()); })
         .catch((err) => { console.error("Error increasing count", err) });
     } else {
@@ -518,29 +526,8 @@ const Businesslistingdetails = ({ businesses }) => {
                     {showForm && (
                       <div className="add-review">
                         <h4>Add a Review</h4>
-                        <input
-                          type="text"
-                          placeholder="Your Name"
-                          className="login-input mb-2"
-                          value={newReview.author}
-                          onChange={(e) =>
-                            setNewReview({
-                              ...newReview,
-                              author: e.target.value,
-                            })
-                          }
-                        />
-                        <textarea
-                          placeholder="Your Comment"
-                          className="login-input mb-2"
-                          value={newReview.comment}
-                          onChange={(e) =>
-                            setNewReview({
-                              ...newReview,
-                              comment: e.target.value,
-                            })
-                          }
-                        ></textarea>
+                        <input type="text" placeholder="Your Name" className="login-input mb-2" value={newReview.author} onChange={(e) => setNewReview({ ...newReview, author: e.target.value, })} />
+                        <textarea placeholder="Your Comment" className="login-input mb-2" value={newReview.comment} onChange={(e) => setNewReview({ ...newReview, comment: e.target.value, })}></textarea>
                         <div className="rating-selection">
                           <p>
                             <b>Select Rating:</b>
@@ -549,26 +536,14 @@ const Businesslistingdetails = ({ businesses }) => {
                             {[...Array(5)].map((_, i) => (
                               <i
                                 key={i}
-                                className={
-                                  i < newReview.rating
-                                    ? "bi bi-star-fill"
-                                    : "bi bi-star"
-                                }
-                                onClick={() =>
-                                  setNewReview({
-                                    ...newReview,
-                                    rating: i + 1,
-                                  })
-                                }
+                                className={i < newReview.rating ? "bi bi-star-fill" : "bi bi-star"}
+                                onClick={() => setNewReview({ ...newReview, rating: i + 1, })}
                                 style={{ cursor: "pointer" }}
                               ></i>
                             ))}
                           </div>
                         </div>
-                        <button
-                          className="btn btn-primary"
-                          onClick={handleAddReview}
-                        >
+                        <button className="btn btn-primary" onClick={handleAddReview}                        >
                           Submit
                         </button>
                       </div>

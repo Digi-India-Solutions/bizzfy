@@ -3,10 +3,12 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import Link from "next/link";
 
-const Dashboard = () => {
+const Dashboard = ({ businessListing }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [singleData, setSingleData] = useState(businessListing.length > 0 ? businessListing[0]?._id : []);
+  const [totalProfileViews, setTotalProfileViews] = useState(0);
   const menuRef = useRef();
-
+  console.log("businessListing:---", businessListing)
   useEffect(() => {
     const handler = (e) => {
       if (!menuRef.current?.contains(e.target)) setDropdownOpen(false);
@@ -14,6 +16,23 @@ const Dashboard = () => {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  const filteredData = businessListing?.find((item) => item?._id === singleData);
+
+  const clickCountsArray = filteredData?.clickCounts
+    ? Object.entries(filteredData.clickCounts).map(([key, { count, user }]) => ({
+        title: key.charAt(0).toUpperCase() + key.slice(1), // Capitalized title
+        count,
+        user    
+      }))
+    : [];
+
+
+  const totalListings = businessListing.reduce((acc, item) => {
+    return acc + (item?.clickCounts?.listings.count || 0);
+  }, 0);
+
+
 
   return (
     <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#f8f9fa" }}>
@@ -54,29 +73,35 @@ const Dashboard = () => {
               <h2 className="mb-4">Dashboard Overview</h2>
             </div>
             <div className="col-md-4">
-              <select className="form-control">
+              <select value={singleData} onChange={(e) => setSingleData(e.target.value)} className="form-control">
                 <option value="">Select Category</option>
-                <option value="category 1">Category 1</option>
-                <option value="category 2">Category 2</option>
-                <option value="category 3">Category 3</option>
+                {businessListing?.map((item, i) => (
+                  <option key={i} value={item?._id}>{item?.businessDetails?.businessName}</option>
+                ))}
               </select>
             </div>
           </div>
 
           {/* Example stats cards */}
           <div className="row g-4">
-            {[
-              { title: "Total Listings", value: 23 },
-              { title: "New Messages", value: 5 },
-              { title: "Profile Views", value: 128 },
-            ].map((item, i) => (
-              <div key={i} className="col-md-4">
-                <div className="card shadow-sm border-0">
-                  <div className="card-body">
-                    <h5 className="card-title">{item.title}</h5>
-                    <p className="card-text display-6">{item.value}</p>
-                  </div>
+            <div key={"Total Profile Views"} className="col-md-4">
+              <div className="card shadow-sm border-0">
+                <div className="card-body">
+                  <h5 className="card-title">Total Profile Views</h5>
+                  <p className="card-text display-6">{totalListings}</p>
                 </div>
+              </div>
+            </div>
+            {clickCountsArray?.map((item, i) => (
+              <div key={i} className="col-md-4">
+                {item.title === '_id' ? '' :
+                  <div className="card shadow-sm border-0">
+                    <div className="card-body">
+                      <h5 className="card-title">{item.title}</h5>
+                      <p className="card-text display-6">{item.count}</p>
+                    </div>
+                    <div style={{ marginLeft: "auto", cursor: "pointer",color: "#0d6efd" }}>View All</div>
+                  </div>}
               </div>
             ))}
           </div>

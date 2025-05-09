@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import { Contact } from "../../models/Contact";
+import Contact from "../../models/Contact";
+
 
 // Get all contacts
 export const getAllContacts = async (req: Request, res: Response) => {
@@ -11,9 +12,9 @@ export const getAllContacts = async (req: Request, res: Response) => {
   }
 };
 
-// Create contact (for Postman or frontend form)
 export const createContact = async (req: Request, res: Response) => {
   try {
+    console.log("XXXXXXXXXX..", req.body)
     const newContact = new Contact(req.body);
     const savedContact = await newContact.save();
     res.status(201).json(savedContact);

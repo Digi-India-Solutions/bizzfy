@@ -271,6 +271,7 @@ const Page = () => {
   const [visibleCount, setVisibleCount] = useState(4);
   const [businesses, setBusinesses] = useState([]);
   const [tocken, setToken] = useState("");
+  const [user, setUser] = useState("");
   const [formData, setFormData] = useState({ email: "", password: "", remember: false, });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
@@ -281,7 +282,10 @@ const Page = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("biziffyToken");
+    const user = localStorage.getItem("biziffyUser");
+    console.log('USER:-', JSON.parse(user)._id)
     setToken(token);
+    setUser(JSON.parse(user)._id)
   }, [])
   useEffect(() => {
     const q = searchParams.get("query") || "";
@@ -325,8 +329,8 @@ const Page = () => {
   }, [pincode, query]);
 
 
-  const handleCountClick = (type) => {
-    const businessId = businesses?._id;
+  const handleCountClick = (type, businessId) => {
+
     if (!businessId || !type) return;
 
     const key = `business_click_${businessId}_${type}`;
@@ -338,7 +342,7 @@ const Page = () => {
 
     if (!lastClickDay || parseInt(lastClickDay) < currentDay) {
 
-      axios.post(`http://localhost:5000/api/increase-click-count/${businessId}`, { type })
+      axios.post(`http://localhost:5000/api/increase-click-count/${businessId}`, { type, user })
         .then(() => { console.log(`${type} click counted`); localStorage.setItem(key, currentDay.toString()); })
         .catch((err) => { console.error("Error increasing count", err) });
     } else {
@@ -397,7 +401,7 @@ const Page = () => {
 
                   const handleCardClick = () => {
                     if (tocken) {
-                      handleCountClick('listings')
+                      handleCountClick('listings', biz?._id)
                       window.location.href = `/Pages/bussiness-listing/${biz?._id}`;
                     } else {
                       const modal = new bootstrap.Modal(document.getElementById('exampleModalToggle'));
@@ -573,7 +577,7 @@ const Page = () => {
                           </div>
 
                           <div className="d-flex gap-2 align-items-center">
-                            <p>{biz?.businessDetails?.yib||'0.6'} years in business</p>
+                            <p>{biz?.businessDetails?.yib || '0.6'} years in business</p>
                             <span>|</span>
                             <p>
                               {biz.businessDetails?.city}, {biz.businessDetails?.state}

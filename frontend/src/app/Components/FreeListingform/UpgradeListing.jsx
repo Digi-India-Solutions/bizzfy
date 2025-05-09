@@ -107,7 +107,7 @@ const UpgradeListing = ({formData, setFormData ,handleListingSubmit}) => {
       {/* Submit Without Upgrade */}
       <div className="mt-2">
         {/* <Link href="/Pages/freelistingform/freelistingformsuccess" passHref> */}
-          <button type="button" className="btn btn-success w-100 py-2">
+          <button type="button" onClick={handleSubmit} className="btn btn-success w-100 py-2">
             Submit without Upgrade
           </button>
         {/* </Link> */}

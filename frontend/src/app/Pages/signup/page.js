@@ -71,13 +71,12 @@ const Page = () => {
     try {
       const { email } = formData;
       setLoading(true)
-
       const response = await axios.post("http://localhost:5000/api/auth/send-otp-user-signup", { email });
       console.log("XXXXXXXXXXX", response)
-      if (response.data.status) {
+      if (response?.data?.status) {
         setOpenOtp(true);
         setLoading(false)
-        console.log("Signup response:", response.data.message);
+        console.log("Signup response:", response?.data?.message);
       } else {
         setLoading(false)
         alert(response.data.message)
@@ -221,7 +220,7 @@ const Page = () => {
                   </div>
                   {errors.confirmPassword && <p className="validation-text">{errors.confirmPassword}</p>}
 
-                  <button className="login-btn bg-dark text-white border-0 w-100 mb-3">
+                  <button onClick={handleSubmit} className="login-btn bg-dark text-white border-0 w-100 mb-3">
                     {loading ? "Loading..." : "Get Started"}
                   </button>
 
