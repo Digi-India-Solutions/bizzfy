@@ -187,26 +187,23 @@
 
 
 "use client";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import Head from "next/head";
 import Image from "next/image";
 import ReCAPTCHA from "react-google-recaptcha";
 import contactImage from "../../Images/contact-man.png";
 import "./contactus.css";
 import axios from "axios";
+import { Country, State, City } from 'country-state-city';
 
 const cities = ["Delhi", "Mumbai", "Kolkata", "Chennai"];
-const inquiryTypes = ["General Inquiry", "Partnership", "Advertising", "Support"];
+const inquiryTypes = ["general", "partnership", "advertising", "support"];
 
 const Page = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    city: "",
-    inquiryType: "",
-    termsAccepted: false,
-  });
+  const [stateList, setStateList] = useState([])
+  const [cityList, setCityList] = useState([])
+  const [stateCode, setStateCode] = useState('')
+  const [formData, setFormData] = useState({ name: "", email: "", phone: "", state: '', city: "", inquiryType: "", termsAccepted: false, });
 
   const [captchaVerified, setCaptchaVerified] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -222,6 +219,18 @@ const Page = () => {
   // const handleCaptchaChange = useCallback((value) => {
   //   setCaptchaVerified(!!value);
   // }, []);
+
+  useEffect(() => {
+    const statesOfIndia = State.getStatesOfCountry('IN');
+    console.log(statesOfIndia);
+    setStateList(statesOfIndia)
+  }, [])
+
+  useEffect(() => {
+    const citiesOfDelhi = City.getCitiesOfState('IN', formData?.stateCode);
+    console.log(citiesOfDelhi);
+    setCityList(citiesOfDelhi)
+  }, [formData?.stateCode])
 
   const handleSubmit = async (e) => {
     if (!captchaVerified) {
@@ -244,14 +253,7 @@ const Page = () => {
       const response = await axios.post("http://localhost:5000/api/contactus/create-contact", payload);
       console.log("Submission response:", response.data);
       alert("Your message has been sent successfully!");
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        city: "",
-        inquiryType: "",
-        termsAccepted: false,
-      });
+      setFormData({ name: "", email: "", phone: "", city: "", state: '', inquiryType: "", termsAccepted: false, });
       setCaptchaVerified(false);
     } catch (error) {
       console.error("Submission failed:", error);
@@ -300,45 +302,38 @@ const Page = () => {
               <form className="contact-form" onSubmit={handleSubmit}>
                 <div className="form-group">
                   <label htmlFor="name" className="form-label">Full Name</label>
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    className="form-input"
-                    placeholder="Your Full Name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                  />
+                  <input id="name" name="name" type="text" className="form-input" placeholder="Your Full Name" value={formData.name} onChange={handleChange} required />
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="email" className="form-label">Email Address</label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    className="form-input"
-                    placeholder="Your Email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                  />
+                  <input id="email" name="email" type="email" className="form-input" placeholder="Your Email" value={formData.email} onChange={handleChange} required />
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="phone" className="form-label">Phone Number</label>
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    pattern="[0-9]{10}"
-                    className="form-input"
-                    placeholder="Your Phone Number"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    required
-                  />
+                  <input id="phone" name="phone" type="tel" pattern="[0-9]{10}" className="form-input" placeholder="Your Phone Number" value={formData.phone} onChange={handleChange} required />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="state" className="form-label">State</label>
+                  <select
+                    id="state"
+                    name="state"
+                    className="form-select"
+                    value={formData.stateCode} // stateCode will store isoCode
+                    onChange={(e) => {
+                      const selectedIsoCode = e.target.value;
+                      const selectedState = stateList.find(state => state.isoCode === selectedIsoCode);
+                      setFormData({ ...formData, stateCode: selectedIsoCode, state: selectedState?.name || '', });
+                    }} required  >
+                    <option value="">Select State</option>
+                    {stateList.map((state) => (
+                      <option key={state.isoCode} value={state.isoCode}>
+                        {state.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="form-group">
@@ -352,8 +347,8 @@ const Page = () => {
                     required
                   >
                     <option value="">Select City</option>
-                    {cities.map((city) => (
-                      <option key={city} value={city}>{city}</option>
+                    {cityList?.map((city) => (
+                      <option key={city.name} value={city.name}>{city.name}</option>
                     ))}
                   </select>
                 </div>

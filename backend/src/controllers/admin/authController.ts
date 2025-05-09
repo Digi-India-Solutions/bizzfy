@@ -127,37 +127,45 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
 
+    // Validate request body
     if (!email || !password) {
       res.status(200).json({ status: false, message: "Email and Password are required" });
       return;
     }
 
+    // Check if user exists
     const user = await User.findOne({ email });
-
     if (!user) {
       res.status(204).json({ status: false, message: "User not found" });
       return;
     }
 
+    // Compare passwords
     const isPasswordMatched = await bcrypt.compare(password, user.password);
-    console.log("isPasswordMatched:-", isPasswordMatched)
     if (!isPasswordMatched) {
-      console.log("isPasswordMatched:-", isPasswordMatched)
       res.status(201).json({ status: false, message: "Incorrect password" });
       return;
     }
 
+    // Check if user is active
+    if (user.status === "Inactive") {
+      res.status(203).json({ status: false, message: "Please contact admin. Your account is inactive." });
+      return;
+    }
+
+    // Generate JWT token
     const token = jwt.sign(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET as string,
-      { expiresIn: process.env.JWT_EXPIRES || '1d' }
+      { expiresIn: process.env.JWT_EXPIRES || "1d" }
     );
 
-    res.status(200).json({ status: true, message: "User logged in successfully", token, user: user });
+    // Success
+    res.status(200).json({ status: true, message: "User logged in successfully", token, user, });
 
   } catch (error: any) {
     console.error("Login Error:", error);
-    res.status(500).json({ status: false, message: "Internal Server Error", error: error.message });
+    res.status(500).json({ status: false, message: "Internal Server Error", error: error.message, });
   }
 };
 
