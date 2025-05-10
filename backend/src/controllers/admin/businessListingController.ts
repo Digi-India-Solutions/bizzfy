@@ -4,6 +4,7 @@ import path from "path";
 import fs from "fs";
 import { deleteImage, uploadImage } from "../../utils/cloudinary";
 import { deleteLocalFile } from "../../utils/deleteImageFromLocalFolder";
+import mongoose from "mongoose";
 
 // Step 1: Create Contact
 // export const createContact = async (req: Request, res: Response) => {
@@ -603,7 +604,6 @@ export const searchBusinessListings = async (req: Request, res: Response) => {
   }
 };
 
-
 export const increaseClickCount = async (req: Request, res: Response) => {
   try {
     const allowedClickTypes = ["direction", "share", "contact", "website", "whatsapp", "listings"];
@@ -623,23 +623,33 @@ export const increaseClickCount = async (req: Request, res: Response) => {
       return res.status(404).json({ status: false, message: "Business not found." });
     }
 
-    // Initialize clickCounts object and ensure all keys exist
+    // Ensure clickCounts is initialized
     if (!business.clickCounts) {
-      business.clickCounts = {};
+      business.clickCounts = {} as any;
     }
 
-    for (const clickType of allowedClickTypes) {
-      if (!business.clickCounts[clickType]) {
-        business.clickCounts[clickType] = {
-          count: 0,
-          user: user // Initialize with current user to avoid validation error
-        };
-      }
+    // Ensure the specific click type is initialized
+    if (!business.clickCounts[type]) {
+      business.clickCounts[type] = {
+        count: 0,
+        user: [],
+      };
     }
 
-    // Now safely increment the specific type
+    // If user is not an array (corrupted), convert it
+    if (!Array.isArray(business.clickCounts[type].user)) {
+      business.clickCounts[type].user = business.clickCounts[type].user
+        ? [business.clickCounts[type].user]
+        : [];
+    }
+
+    // Only add user if not already present
+    if (!business.clickCounts[type].user.some((u: any) => u.toString() === user)) {
+      business.clickCounts[type].user.push(user);
+    }
+
+    // Increment the click count
     business.clickCounts[type].count += 1;
-    business.clickCounts[type].user = user;
 
     await business.save();
 
@@ -653,3 +663,4 @@ export const increaseClickCount = async (req: Request, res: Response) => {
     return res.status(500).json({ status: false, message: error.message || "Server error." });
   }
 };
+

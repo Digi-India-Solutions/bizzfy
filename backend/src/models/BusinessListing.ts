@@ -106,7 +106,7 @@ const UpgradeListingSchema = new mongoose.Schema({
 
 const ClickDetailSchema = new mongoose.Schema({
   count: { type: Number, default: 0 },
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "Auth", default: '' },
+  user: [{type: mongoose.Schema.Types.ObjectId, ref: "Auth", default: ''} ],
 });
 
 const ClickCountsSchema = new mongoose.Schema({

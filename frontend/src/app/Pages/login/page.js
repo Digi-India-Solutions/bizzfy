@@ -67,7 +67,7 @@ const Login = () => {
     setIsLoading(true);
     try {
       const response = await axios.post('http://localhost:5000/api/auth/user-login', { email: formData.email, password: formData.password, });
-      console.log("API Response:", response.data.token);
+      console.log("API Response:", response);
       if (response?.data?.status) {
 
         console.log("API Response:", response?.data);
