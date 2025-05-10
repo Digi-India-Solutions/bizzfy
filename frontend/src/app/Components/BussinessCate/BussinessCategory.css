@@ -41,6 +41,16 @@
   transform: scale(1.2); /* Slightly larger on hover */
 }
 
+.default-icon {
+  width: 50px;
+  height: 50px;
+  background-color: #f0f0f0;
+  color: #555;
+  font-weight: bold;
+  font-size: 1.2rem;
+  border-radius: 50%;
+}
+
 /* Medium Screens (Tablets) */
 @media (max-width: 768px) {
   .bussiness-category-card {
@@ -93,25 +103,3 @@
     font-size: 9px;
   }
 }
-
-
-
-.default-icon {
-  width: 50px;
-  height: 50px;
-  background-color: #f0f0f0;
-  color: #555;
-  font-weight: bold;
-  font-size: 1.2rem;
-  border-radius: 50%;
-}
-.bussiness-category-card {
-  border: 1px solid #eee;
-  border-radius: 8px;
-  transition: 0.3s ease-in-out;
-  background: #fff;
-}
-.bussiness-category-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-

@@ -97,6 +97,36 @@
   border-radius: 130px;
 }
 
+.location-dropdown{
+  border: none;
+  display: flex;
+  width: 170px;
+  background-color: transparent;
+}
+
+/* .dropdown-menu{
+  width: 400px;
+  height: 300px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 162, 255, 0.3);
+  background-color: #fff;
+  margin-top: 10px;
+  padding: 10px;
+  z-index: 2;
+  border: 1px solid var(--blue);
+} */
+
+.dropdown-menu li {
+  cursor: pointer;
+}
+
+/* .dropdown-item{
+  padding: 5px 0 !important;
+  border-bottom: 1px solid lightgray !important;
+} */
+
 /* 🎬 Floating Animation */
 @keyframes floatAnimation {
   0% {
@@ -113,6 +143,7 @@
 }
 
 /* 📱 Responsive Design */
+
 
 @media (max-width: 768px) {
   .hero-title {

@@ -21,7 +21,7 @@
 
 .social-icons a {
   color: var(--black);
-  font-size: 18px;
+  font-size: 20px;
   border: 1px solid var(--black);
   padding: 5px 10px;
   border-radius: 50%;
@@ -29,8 +29,8 @@
 }
 .social-icons a:hover {
   color: white;
-  background-color: var(--blue);
-  scale: 1.2;
+  background-color: var(--black);
+  /* scale: 1.2; */
   transition: all 0.3s;
 }
 
