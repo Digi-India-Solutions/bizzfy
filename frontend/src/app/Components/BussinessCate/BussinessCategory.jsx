@@ -42,14 +42,12 @@ const BussinessCategory = () => {
         <div className="row">
           {categories.map((category) => (
             <div key={category._id} className="col-lg-2 col-md-3 col-sm-4 col-4">
-              <Link href={`Pages/subCategoryFilter?categoryId=${category._id}`} passHref>
+              <Link className="text-decoration-none" href={`Pages/subCategoryFilter?categoryId=${category._id}`} passHref>
                 <div className="bussiness-category-card text-center p-3">
                   {category.icon && (
                     <img
                       src={`${category?.icon}`} 
                       alt={category?.name}
-                      width={50}
-                      height={50}
                       // onError={(e) => {
                       //   e.currentTarget.src = "/path/to/default-category-image.png";
                       // }}

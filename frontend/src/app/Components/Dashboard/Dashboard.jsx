@@ -2,11 +2,13 @@ import React, { useState, useRef, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import Link from "next/link";
-
+import './dashboard.css'
+import DashboardDetails from "../DashboardDetails/DashboardDetails";
 const Dashboard = ({ businessListing }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [singleData, setSingleData] = useState(businessListing.length > 0 ? businessListing[0]?._id : []);
   const [totalProfileViews, setTotalProfileViews] = useState(0);
+  const [type, setType] = useState("listings");
   const menuRef = useRef();
   console.log("businessListing:---", businessListing)
   useEffect(() => {
@@ -21,10 +23,10 @@ const Dashboard = ({ businessListing }) => {
 
   const clickCountsArray = filteredData?.clickCounts
     ? Object.entries(filteredData.clickCounts).map(([key, { count, user }]) => ({
-        title: key.charAt(0).toUpperCase() + key.slice(1), // Capitalized title
-        count,
-        user    
-      }))
+      title: key.charAt(0).toUpperCase() + key.slice(1), // Capitalized title
+      count,
+      user
+    }))
     : [];
 
 
@@ -32,19 +34,31 @@ const Dashboard = ({ businessListing }) => {
     return acc + (item?.clickCounts?.listings.count || 0);
   }, 0);
 
-
+  const gradients = [
+    "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+    "linear-gradient(135deg, #5ee7df 0%, #b490ca 100%)",
+    "linear-gradient(135deg, #c3cfe2 0%, #c3cfe2 100%)",
+    "linear-gradient(135deg, #f6d365 0%, #fda085 100%)",
+    "linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)",
+    "linear-gradient(135deg, #fccb90 0%, #d57eeb 100%)"
+  ];
 
   return (
     <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#f8f9fa" }}>
       <div className="flex-grow-1">
         {/* Navbar */}
         <nav className="navbar navbar-light bg-white shadow-sm px-4 d-flex justify-content-between">
-          <span className="navbar-brand mb-0 h5">Welcome, User</span>
+          <Link className="navbar-brand" href="/">
+            <p className="logo-text">
+              Bizi<span>ff</span>y{" "}
+            </p>
+            {/* <Image src={logo} alt="logo" /> */}
+          </Link>
 
           {/* Profile Dropdown */}
           <div className="position-relative" ref={menuRef}>
             <button
-              className="btn btn-light d-flex align-items-center gap-2"
+              className="btn btn-light d-flex align-items-center gap-2 m-0"
               onClick={() => setDropdownOpen(!dropdownOpen)}
             >
               <i className="bi bi-person-circle fs-5"></i>
@@ -52,14 +66,14 @@ const Dashboard = ({ businessListing }) => {
             </button>
             {dropdownOpen && (
               <div
-                className="position-absolute end-0 mt-2 bg-white border shadow rounded p-2"
+                className="position-absolute end-0 bg-white border shadow rounded p-2"
                 style={{ minWidth: "160px", zIndex: 1000 }}
               >
                 <Link href="/Pages/Profile" className="dropdown-item">
-                  <i className="bi bi-person me-2"></i> Profile
+                  <i className="bi bi-person"></i> Profile
                 </Link>
                 <button onClick={() => alert("Logout logic here")} className="dropdown-item text-danger">
-                  <i className="bi bi-box-arrow-right me-2"></i> Logout
+                  <i className="bi bi-box-arrow-right"></i> Logout
                 </button>
               </div>
             )}
@@ -82,28 +96,64 @@ const Dashboard = ({ businessListing }) => {
             </div>
           </div>
 
-          {/* Example stats cards */}
           <div className="row g-4">
-            <div key={"Total Profile Views"} className="col-md-4">
+            <div key={"Total Profile Views"} className="col-md-3  " onClick={() => setType("table")}>
               <div className="card shadow-sm border-0">
-                <div className="card-body">
+                <div className="card-body dashboard-card-body">
                   <h5 className="card-title">Total Profile Views</h5>
                   <p className="card-text display-6">{totalListings}</p>
                 </div>
               </div>
             </div>
-            {clickCountsArray?.map((item, i) => (
-              <div key={i} className="col-md-4">
-                {item.title === '_id' ? '' :
+
+            {clickCountsArray?.map((item, i) =>
+              item.title !== '_id' && (
+                <div key={i} className="col-md-3" onClick={() => setType(item.title)}>
                   <div className="card shadow-sm border-0">
-                    <div className="card-body">
+                    <div className="card-body dashboard-card-body" style={{ background: gradients[(i + 1) % gradients.length] }}>
                       <h5 className="card-title">{item.title}</h5>
                       <p className="card-text display-6">{item.count}</p>
+                      <div style={{ margin: "auto", color: "#0d6efd", cursor: 'pointer' }}>View All</div>
                     </div>
-                    <div style={{ marginLeft: "auto", cursor: "pointer",color: "#0d6efd" }}>View All</div>
-                  </div>}
-              </div>
-            ))}
+                  </div>
+                </div>
+              )
+            )}
+            {/* {(() => {
+              switch (type) {
+                case "listing":
+                  return (
+                    <>
+                      <h1>Listing Section</h1>
+                    </>
+                  );
+
+                case "Listings":
+                  return (
+                    <>
+                      <h1>Table View</h1>
+                    </>
+                  );
+
+                case "Whatsapp":
+                  return (
+                    <>
+                      <h1>User Profile</h1>
+                    </>
+                  );
+
+                case "Website":
+                  return (
+                    <>
+                      <h1>Analytics Dashboard</h1>
+                    </>
+                  );
+
+                default:
+                  return <h1>No valid type selected</h1>;
+              }
+            })()} */}
+            <DashboardDetails />
           </div>
         </div>
       </div>

@@ -412,7 +412,7 @@ const page = () => {
                     </ul>
                   </div>
                   <div className="d-flex justify-content-center">
-                    <button className="login-btn">Buy Plan</button>
+                    <Link href={'/Pages/checkout'} className="login-btn">Buy Plan</Link>
                   </div>
                 </div>
               </div>

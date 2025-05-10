@@ -15,7 +15,7 @@ const page = () => {
             Congratulations - Your business is now registered with Biziffy
           </strong>
           <strong style={{ color: '#d46d62' ,fontSize:'13px' }}>
-            We will verify your details and update you within 24 hours.
+            We will verify your details and update you as soon as possible.
           </strong>
         </div>
       </div>
