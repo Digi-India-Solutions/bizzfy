@@ -47,7 +47,8 @@ const Businesslistingdetails = ({ businesses }) => {
   const [showAllHours, setShowAllHours] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [user, setUser] = useState('')
-
+  const [enquiryForm, setEnquiryForm] = useState({ name: '', phone: '', requirement: '', user: '' })
+  console.log("EnquiryForm", enquiryForm)
   // Derived Values
   const visiblePhotos = showAll ? staticPhotos : staticPhotos.slice(0, 4);
 
@@ -116,6 +117,7 @@ const Businesslistingdetails = ({ businesses }) => {
     const user = localStorage.getItem("biziffyUser");
     console.log('USER:-', JSON.parse(user)._id)
     setUser(JSON.parse(user)._id)
+    setEnquiryForm({ ...enquiryForm, user: JSON.parse(user)?._id })
   }, [])
 
   const handleCountClick = (type) => {
@@ -141,6 +143,15 @@ const Businesslistingdetails = ({ businesses }) => {
 
   const today = getCurrentDay();
   console.log("XXXXXXXXDDDDDDD", businesses)
+
+  const handleEnquiryForm = async () => {
+    const respons = axios.post("http://localhost:5000/api/enquiries/create-enquiryform", { ...enquiryForm })
+    if (respons?.data?.status) {
+      setEnquiryForm({ name: '', phone: '', requirement: '' })
+    } else {
+
+    }
+  }
   return (
     <>
       <div className="container mt-4">
@@ -643,35 +654,20 @@ const Businesslistingdetails = ({ businesses }) => {
               </div>
               <div className="mb-3">
                 <label className="form-label">Name</label>
-                <input
-                  type="text"
-                  className=" login-input"
-                  placeholder="Enter your name"
-                />
+                <input type="text" className=" login-input" onChange={(e) => setEnquiryForm({ ...enquiryForm, name: e.target.value })} placeholder="Enter your name" />
               </div>
-
-
-
               <div className="mb-3">
                 <label className="form-label">Phone Number</label>
-                <input
-                  type="tel"
-                  className=" login-input"
-                  placeholder="Enter phone number"
-                />
+                <input type="tel" className=" login-input" onChange={(e) => setEnquiryForm({ ...enquiryForm, phone: e.target.value })} placeholder="Enter phone number" />
               </div>
               <div className="mb-3">
                 <label className="form-label">
                   What are you Looking for...
                 </label>
-                <input
-                  type="text"
-                  className=" login-input"
-                  placeholder="Write you requirement"
-                />
+                <input type="text" className=" login-input" onChange={(e) => setEnquiryForm({ ...enquiryForm, requirement: e.target.value })} placeholder="Write you requirement" />
               </div>
 
-              <button type="submit" className="btn bg-dark text-white w-100">
+              <button type="submit" onClick={handleEnquiryForm} className="btn bg-dark text-white w-100">
                 Get Best Deal <i className="bi bi-chevron-double-right"></i>
               </button>
             </form>

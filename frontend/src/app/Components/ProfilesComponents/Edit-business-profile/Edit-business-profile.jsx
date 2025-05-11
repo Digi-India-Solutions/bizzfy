@@ -494,7 +494,7 @@ export default function EditBusinessProfile({ listingId }) {
                 </label>
                 <select
                   className="form-control"
-                  multiple
+                  // multiple
                   required
                   value={formData.businessSubCategory || []}
                   onChange={handleSubCategoryChange}
