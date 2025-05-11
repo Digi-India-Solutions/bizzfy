@@ -205,7 +205,7 @@ import UserLocation from "../UserLocation/UserLocation";
 import { useRouter } from "next/navigation";
 import "../Navbar/navbar.css";
 import "./businessNavbar.css";
-
+import '../Hero/hero.css';
 const placeholderTexts = [
   "Search for plumbers...",
   "Find the best tutors...",
@@ -223,6 +223,32 @@ const BusinessNavbar = () => {
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [animatedText, setAnimatedText] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  // for location select opion 
+  const [selectedLocation, setSelectedLocation] = useState("");
+
+  const handleSelect = (loc) => {
+    setSelectedLocation(loc);
+    setLocation({ pincode: extractPincode(loc) }); // Optional: You can extract a real pincode
+  };
+
+  const handleClear = () => {
+    setSelectedLocation("");
+    setLocation({});
+  };
+  const locations = [
+    "Rohini, Delhi",
+    "Uttam Nagar, Delhi",
+    "Karol Bagh, Delhi",
+    "Shahadara, Delhi",
+    "Dwarka, Delhi",
+    "Laxmi Nagar, Delhi",
+  ];
+
+  const filteredLocations = locations.filter((loc) =>
+    loc.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   useEffect(() => {
     const token = localStorage.getItem("biziffyToken");
@@ -290,9 +316,56 @@ const BusinessNavbar = () => {
 
             {/* Desktop search bar */}
             <div className="d-none d-lg-flex business-navbar-search-container">
-              <div className="hero-location-select">
+              {/* <div className="hero-location-select">
                 <UserLocation location={location} setLocation={setLocation} />
+              </div> */}
+              <div className="dropdown" style={{ borderRight: '1px solid #ccc' }}>
+                <button
+                  className="location-dropdown"
+                  type="button"
+                  id="locationDropdown"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  <i className="bi bi-geo-alt me-2"></i><UserLocation location={location} setLocation={setLocation} />
+                </button>
+
+                <ul className="dropdown-menu home-select-location p-3 location-dropdown" aria-labelledby="locationDropdown">
+                  {/* Search Input */}
+                  <li>
+                    <input
+                      type="text"
+                      className="form-control mb-2"
+                      placeholder="Search location..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </li>
+                  <li className="dropdown-section-title d-flex justify-content-between">
+                    RECENT LOCATIONS
+                    <span className="text-danger fw-normal" style={{ cursor: "pointer" }} onClick={handleClear}>
+                      Clear All
+                    </span>
+                  </li>
+                  <li>
+                    <a className="dropdown-item" onClick={() => handleSelect("Rohini, Delhi")}>
+                      Rohini, Delhi
+                    </a>
+                  </li>
+                  {filteredLocations.length > 0 ? (
+                    filteredLocations.map((loc, i) => (
+                      <li key={i}>
+                        <a className="dropdown-item" onClick={() => handleSelect(loc)}>
+                          {loc}
+                        </a>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="text-muted px-2">No matching locations</li>
+                  )}
+                </ul>
               </div>
+
               <input
                 type="text"
                 className="hero-search-input"

@@ -129,10 +129,10 @@ const Hero = () => {
                         data-bs-toggle="dropdown"
                         aria-expanded="false"
                       >
-                        <i className="bi bi-geo-alt me-2"></i> {selectedLocation || "Select Location"}
+                        <i className="bi bi-geo-alt me-2"></i><UserLocation location={location} setLocation={setLocation} />
                       </button>
 
-                      <ul className="dropdown-menu p-3 location-dropdown" aria-labelledby="locationDropdown">
+                      <ul className="dropdown-menu home-select-location p-3 location-dropdown" aria-labelledby="locationDropdown">
                         {/* Search Input */}
                         <li>
                           <input
@@ -191,7 +191,7 @@ const Hero = () => {
                 </div>
 
                 <div className="hero-buttons">
-                  <Link href="#" className="herobutton1">
+                  <Link href="/Pages/list-your-webiste" className="herobutton1">
                     List Your Website
                   </Link>
                   <Link href="/Pages/freelistingform" className="herobutton2">
@@ -200,7 +200,6 @@ const Hero = () => {
                 </div>
               </div>
             </div>
-
             {/* Right Image */}
             {/* <div className="col-lg-5 col-md-12 d-flex justify-content-center position-relative">
             <div className="hero-image-container">
