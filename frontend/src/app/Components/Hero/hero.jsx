@@ -120,53 +120,53 @@ const Hero = () => {
 
                 <div className="hero-search-bar">
                   <div className="hero-search-container">
-                    {/* Location Picker */}
-                    <div className="dropdown" style={{ borderRight: '1px solid #ccc' }}>
-                      <button
-                        className="location-dropdown"
-                        type="button"
-                        id="locationDropdown"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                      >
-                        <i className="bi bi-geo-alt me-2"></i><UserLocation location={location} setLocation={setLocation} />
-                      </button>
+                      {/* Location Picker */}
+                      <div className="dropdown" style={{ borderRight: '1px solid #ccc' }}>
+                        <button
+                          className="location-dropdown"
+                          type="button"
+                          id="locationDropdown"
+                          data-bs-toggle="dropdown"
+                          aria-expanded="false"
+                        >
+                          <i className="bi bi-geo-alt me-2"></i><UserLocation location={location} setLocation={setLocation} />
+                        </button>
 
-                      <ul className="dropdown-menu home-select-location p-3 location-dropdown" aria-labelledby="locationDropdown">
-                        {/* Search Input */}
-                        <li>
-                          <input
-                            type="text"
-                            className="form-control mb-2"
-                            placeholder="Search location..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                          />
-                        </li>
-                        <li className="dropdown-section-title d-flex justify-content-between">
-                          RECENT LOCATIONS
-                          <span className="text-danger fw-normal" style={{ cursor: "pointer" }} onClick={handleClear}>
-                            Clear All
-                          </span>
-                        </li>
-                        <li>
-                          <a className="dropdown-item" onClick={() => handleSelect("Rohini, Delhi")}>
-                            Rohini, Delhi
-                          </a>
-                        </li>
-                        {filteredLocations.length > 0 ? (
-                          filteredLocations.map((loc, i) => (
-                            <li key={i}>
-                              <a className="dropdown-item" onClick={() => handleSelect(loc)}>
-                                {loc}
-                              </a>
-                            </li>
-                          ))
-                        ) : (
-                          <li className="text-muted px-2">No matching locations</li>
-                        )}
-                      </ul>
-                    </div>
+                        <ul className="dropdown-menu home-select-location p-3 location-dropdown" aria-labelledby="locationDropdown">
+                          {/* Search Input */}
+                          <li>
+                            <input
+                              type="text"
+                              className="form-control mb-2"
+                              placeholder="Search location..."
+                              value={searchTerm}
+                              onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                          </li>
+                          <li className="dropdown-section-title d-flex justify-content-between">
+                            RECENT LOCATIONS
+                            <span className="text-danger fw-normal" style={{ cursor: "pointer" }} onClick={handleClear}>
+                              Clear All
+                            </span>
+                          </li>
+                          <li>
+                            <a className="dropdown-item" onClick={() => handleSelect("Rohini, Delhi")}>
+                              Rohini, Delhi
+                            </a>
+                          </li>
+                          {filteredLocations.length > 0 ? (
+                            filteredLocations.map((loc, i) => (
+                              <li key={i}>
+                                <a className="dropdown-item" onClick={() => handleSelect(loc)}>
+                                  {loc}
+                                </a>
+                              </li>
+                            ))
+                          ) : (
+                            <li className="text-muted px-2">No matching locations</li>
+                          )}
+                        </ul>
+                      </div>
 
                     <input
                       type="text"
