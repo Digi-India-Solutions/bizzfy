@@ -1,6 +1,7 @@
 import React from 'react'
 
-const DashboardDetails = () => {
+const DashboardDetails = ({ type, setType }) => {
+    console.log('XXXXXXXXX')
     const users = [
         {
             id: 1,

@@ -43,6 +43,7 @@ const Dashboard = ({ businessListing }) => {
     "linear-gradient(135deg, #fccb90 0%, #d57eeb 100%)"
   ];
 
+  console.log("bbbbbbbbb:=", clickCountsArray)
   return (
     <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#f8f9fa" }}>
       <div className="flex-grow-1">
@@ -106,7 +107,7 @@ const Dashboard = ({ businessListing }) => {
               </div>
             </div>
 
-            {clickCountsArray?.map((item, i) =>
+            {/* {clickCountsArray?.map((item, i) =>
               item.title !== '_id' && (
                 <div key={i} className="col-md-3" onClick={() => setType(item.title)}>
                   <div className="card shadow-sm border-0">
@@ -118,7 +119,47 @@ const Dashboard = ({ businessListing }) => {
                   </div>
                 </div>
               )
-            )}
+            )} */}
+
+            <div key={'i'} className="col-md-3" onClick={'() => setType(item.title)'}>
+              <div className="card shadow-sm border-0">
+                <div className="card-body dashboard-card-body" style={{ background: gradients[(1 + 1) % gradients.length] }}>
+                  <h5 className="card-title">{clickCountsArray[1]?.title || 'Listings'}</h5>
+                  <p className="card-text display-6">{clickCountsArray[1]?.count || 0}</p>
+                  <div style={{ margin: "auto", color: "#0d6efd", cursor: 'pointer' }}>View All</div>
+                </div>
+              </div>
+            </div>
+
+            <div key={'i'} className="col-md-3" onClick={'() => setType(clickCountsArray[2])'}>
+              <div className="card shadow-sm border-0">
+                <div className="card-body dashboard-card-body" style={{ background: gradients[(2 + 1) % gradients.length] }}>
+                  <h5 className="card-title">{clickCountsArray[2]?.title || 'Whatsapp'}</h5>
+                  <p className="card-text display-6">{clickCountsArray[2]?.count || 0}</p>
+                  <div style={{ margin: "auto", color: "#0d6efd", cursor: 'pointer' }}>View All</div>
+                </div>
+              </div>
+            </div>
+            <div key={'i'} className="col-md-3" onClick={'() => setType(item.title)'}>
+              <div className="card shadow-sm border-0">
+                <div className="card-body dashboard-card-body" style={{ background: gradients[(3 + 1) % gradients.length] }}>
+                  <h5 className="card-title">{clickCountsArray[3]?.title || 'website'}</h5>
+                  <p className="card-text display-6">{clickCountsArray[3]?.count || 0}</p>
+                  <div style={{ margin: "auto", color: "#0d6efd", cursor: 'pointer' }}>View All</div>
+                </div>
+              </div>
+            </div>
+            <div key={'i'} className="col-md-3" onClick={'() => setType(item.title)'}>
+              <div className="card shadow-sm border-0">
+                <div className="card-body dashboard-card-body" style={{ background: gradients[(4 + 1) % gradients.length] }}>
+                  <h5 className="card-title">{clickCountsArray[4]?.title || 'Listings'}</h5>
+                  <p className="card-text display-6">{clickCountsArray[4]?.count || 0}</p>
+                  <div style={{ margin: "auto", color: "#0d6efd", cursor: 'pointer' }}>View All</div>
+                </div>
+              </div>
+            </div>
+
+
             {/* {(() => {
               switch (type) {
                 case "listing":
@@ -153,7 +194,7 @@ const Dashboard = ({ businessListing }) => {
                   return <h1>No valid type selected</h1>;
               }
             })()} */}
-            <DashboardDetails />
+            <DashboardDetails setType={setType} type={type} />
           </div>
         </div>
       </div>

@@ -64,12 +64,12 @@ const Enquiries = () => {
   };
 
   const exportToCSV = () => {
-    const headers = ["ID", "User Name", "Title", "Name", "Requirement"];
+    const headers = ["ID", "User Name", "Name", "phone", "Requirement"];
     const rows = filteredEnquiries.map((e: any) => [
       e._id,
-      e.userName,
-      e.title,
+      e.user.fullName,
       e.name,
+      e.phone,
       e.requirement,
     ]);
     const csvContent = [headers, ...rows].map((row) => row.join(",")).join("\n");
@@ -118,8 +118,8 @@ const Enquiries = () => {
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sr. No.</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Requirement</th>
             </tr>
           </thead>
@@ -134,9 +134,9 @@ const Enquiries = () => {
               currentEnquiries.map((enquiry: any, index: number) => (
                 <tr key={enquiry._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm text-gray-900">{indexOfFirst + index + 1}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{enquiry.userName || "-"}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{enquiry.title}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{enquiry.user.fullName || "-"}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">{enquiry.name}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{enquiry.phone}</td>
                   <td className="px-6 py-4 text-sm text-gray-900 max-w-lg">
                     {enquiry.requirement || enquiry.name}
                   </td>

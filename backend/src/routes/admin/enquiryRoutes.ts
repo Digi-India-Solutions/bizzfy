@@ -4,6 +4,6 @@ import { getAllEnquiries, createEnquiry } from "../../controllers/admin/enquiryC
 const router = express.Router();
 
 router.get("/", getAllEnquiries);
-router.post("/", createEnquiry);
+router.post("/create-enquiryform", createEnquiry);
 
 export default router;
