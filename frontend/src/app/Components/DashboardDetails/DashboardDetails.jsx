@@ -1,56 +1,72 @@
-import React from 'react'
+import React from 'react';
+import moment from 'moment'; // Optional: for date formatting
 
-const DashboardDetails = ({ type, setType }) => {
-    console.log('XXXXXXXXX')
-    const users = [
-        {
-            id: 1,
-            userName: 'John Doe',
-            contactNumber: '1234567890',
-            date: '2025-05-09',
-            dateTime: '2025-05-09 10:30 AM',
-        },
-        {
-            id: 2,
-            userName: 'Jane Smith',
-            contactNumber: '9876543210',
-            date: '2025-05-08',
-            dateTime: '2025-05-08 04:45 PM',
-        },
-        // Add more users as needed
-    ];
+const DashboardDetails = ({ type }) => {
+    const users = type?.user || [];
+    const title = type?.title || "Dashboard";
+
+    if (!users.length) {
+        return (
+            <div className="container mt-4 text-center text-muted">
+                <h5>No user data available.</h5>
+            </div>
+        );
+    }
 
     return (
-        <>
-            <section className='listings-details'>
-                <div className="container mt-4">
-                    <h2 className="mb-4">User Table</h2>
-                    <table className="table table-bordered table-hover">
-                        <thead className="table-light">
-                            <tr>
-                                <th>ID</th>
-                                <th>User Name</th>
-                                <th>Contact Number</th>
-                                <th>Date</th>
-                                <th>Date & Time</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {users.map((user) => (
-                                <tr key={user.id}>
-                                    <td>{user.id}</td>
-                                    <td>{user.userName}</td>
-                                    <td>{user.contactNumber}</td>
-                                    <td>{user.date}</td>
-                                    <td>{user.dateTime}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+        <section className='listings-details'>
+            <div className="container mt-4">
+                <div className="card shadow-sm border-0 rounded-4">
+                    <div className="card-header bg-primary text-white rounded-top-4">
+                        <h4 className="mb-0">👥 {title} ({users.length})</h4>
+                    </div>
+                    <div className="card-body p-0">
+                        <div className="table-responsive">
+                            <table className="table table-striped table-hover mb-0 align-middle" style={{ overflowX: 'scroll',overflowY:'scroll' }}>
+                                <thead className="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Profile</th>
+                                        <th>Full Name</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <th>City / State</th>
+                                        <th>Status</th>
+                                        <th>Created At</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {users.map((user, index) => (
+                                        <tr key={user._id}>
+                                            <td>{index + 1}</td>
+                                            <td>
+                                                <img
+                                                    src={user.profileImage}
+                                                    alt={user.fullName}
+                                                    className="rounded-circle"
+                                                    style={{ width: '40px', height: '40px', objectFit: 'cover' }}
+                                                />
+                                            </td>
+                                            <td>{user.fullName || "N/A"}</td>
+                                            <td>{user.email || "N/A"}</td>
+                                            <td>{user.phone || "N/A"}</td>
+                                            <td>{user.city || "N/A"}, {user.state || "N/A"}</td>
+                                            <td>
+                                                <span className={`badge bg-${user.status === "Active" ? "success" : "secondary"}`}>
+                                                    {user.status}
+                                                </span>
+                                            </td>
+                                            <td>{moment(user.createdAt).format("DD MMM YYYY, h:mm A")}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-            </section>
-        </>
-    )
-}
+            </div>
+        </section>
+    );
+};
 
-export default DashboardDetails
+export default DashboardDetails;
