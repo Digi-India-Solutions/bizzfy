@@ -62,12 +62,21 @@ export default function UserLocation({ location, setLocation }) {
     return { city, state, pincode };
   };
 
+  const truncateLocation = (text) => {
+    if (!text) return '';
+    const words = text.split(' ');
+    return words.length <= 3 ? text : `${words.slice(0, 3).join(' ')}...`;
+  };
+
   return (
     <div>
       {location ? (
         <>
-          <p className="m-0 p-0 location-detact">
-            {location.city} {location.state}
+          <p
+            className="m-0 p-0 location-detact"
+            title={location.city + ' ' + location.state} // Tooltip for full location
+          >
+            {truncateLocation(location.city + ' ' + location.state)}
           </p>
         </>
       ) : (
@@ -77,5 +86,6 @@ export default function UserLocation({ location, setLocation }) {
         </>
       )}
     </div>
+
   );
 }
