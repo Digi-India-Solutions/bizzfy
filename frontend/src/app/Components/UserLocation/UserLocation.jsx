@@ -67,7 +67,7 @@ export default function UserLocation({ location, setLocation }) {
       {location ? (
         <>
           <p className="m-0 p-0 location-detact">
-            {location.city}, {location.state}
+            {location.city} {location.state}
           </p>
         </>
       ) : (
