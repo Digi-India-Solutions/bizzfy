@@ -3,7 +3,7 @@ import Head from 'next/head'
 import { useRef, useState } from 'react'
 import styles from './module.css'
 const page = () => {
-   const [step, setStep] = useState(1);
+  const [step, setStep] = useState(1);
   const [validated, setValidated] = useState(false);
 
   const formRef1 = useRef(null);
@@ -48,168 +48,168 @@ const page = () => {
                 </li>
                 <li className="nav-item">
                   <span className={`nav-link ${step === 2 ? 'active' : ''}`}>
-                    <i className="bi bi-check2-circle me-2"></i> Additional Info
+                    <i className="bi bi-check2-circle me-2"></i> Additional Information
                   </span>
                 </li>
               </ul>
 
               <div className="tab-content bg-white p-4 shadow rounded">
                 <>
-      {/* Step 1 */}
-      {step === 1 && (
-        <form ref={formRef1} noValidate className={validated ? 'was-validated' : ''} onSubmit={handleNext}>
-          <h4 className="text-primary mb-4">Step 1: Business Information</h4>
+                  {/* Step 1 */}
+                  {step === 1 && (
+                    <form ref={formRef1} noValidate className={validated ? 'was-validated' : ''} onSubmit={handleNext}>
+                      <h4 className="text-primary mb-4">Step 1: Business Information</h4>
 
-          <div className="mb-3">
-            <label className="form-label">Company Name</label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Enter your company / business name..."
-              required
-              minLength={2}
-            />
-            <div className="invalid-feedback">Company name is required (min 2 characters).</div>
-          </div>
+                      <div className="mb-3">
+                        <label className="form-label">Company Name</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Enter your company / business name..."
+                          required
+                          minLength={2}
+                        />
+                        <div className="invalid-feedback">Company name is required (min 2 characters).</div>
+                      </div>
 
-          <div className="mb-3">
-            <label className="form-label">Website URL</label>
-            <input
-              type="url"
-              className="form-control"
-              placeholder="Enter your website URL"
-              pattern="https?://.+"
-            />
-            <div className="invalid-feedback">Enter a valid URL (starting with http:// or https://).</div>
-          </div>
+                      <div className="mb-3">
+                        <label className="form-label">Website URL</label>
+                        <input
+                          type="url"
+                          className="form-control"
+                          placeholder="Enter your website URL"
+                          pattern="https?://.+"
+                        />
+                        <div className="invalid-feedback">Enter a valid URL (starting with http:// or https://).</div>
+                      </div>
 
-          <div className="mb-3">
-            <label className="form-label">Short Description</label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="e.g. We are a leading furniture manufacturer..."
-              required
-              minLength={10}
-            />
-            <div className="invalid-feedback">Short description must be at least 10 characters.</div>
-          </div>
+                      <div className="mb-3">
+                        <label className="form-label">Short Description</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="e.g. We are a leading furniture manufacturer..."
+                          required
+                          minLength={10}
+                        />
+                        <div className="invalid-feedback">Short description must be at least 10 characters.</div>
+                      </div>
 
-          <div className="mb-3">
-            <label className="form-label">About Your Business</label>
-            <textarea
-              className="form-control"
-              rows="4"
-              required
-              placeholder="Describe your business, services offered, years of experience, and what makes you unique."
-              minLength={30}
-            ></textarea>
-            <div className="invalid-feedback">Please write at least 30 characters.</div>
-          </div>
+                      <div className="mb-3">
+                        <label className="form-label">About Your Business</label>
+                        <textarea
+                          className="form-control"
+                          rows="4"
+                          required
+                          placeholder="Describe your business, services offered, years of experience, and what makes you unique."
+                          minLength={30}
+                        ></textarea>
+                        <div className="invalid-feedback">Please write at least 30 characters.</div>
+                      </div>
 
-          <div className="mb-3">
-            <label className="form-label">Services</label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="e.g. Furniture Sales, Modular Kitchen Setup, Custom Sofa Design"
-              required
-            />
-            <div className="invalid-feedback">Please enter your services.</div>
-          </div>
+                      <div className="mb-3">
+                        <label className="form-label">Services</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="e.g. Furniture Sales, Modular Kitchen Setup, Custom Sofa Design"
+                          required
+                        />
+                        <div className="invalid-feedback">Please enter your services.</div>
+                      </div>
 
-          <div className="mb-3">
-            <label className="form-label">Area / Location</label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="e.g. Andheri East, Mumbai or 400059"
-              required
-              minLength={3}
-            />
-            <div className="invalid-feedback">Area or pincode is required.</div>
-          </div>
+                      <div className="mb-3">
+                        <label className="form-label">Area / Location</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="e.g. Andheri East, Mumbai or 400059"
+                          required
+                          minLength={3}
+                        />
+                        <div className="invalid-feedback">Area or pincode is required.</div>
+                      </div>
 
-          <div className="mb-4">
-            <label className="form-label">Business Logo</label>
-            <input
-              type="file"
-              className="form-control"
-              accept=".png,.jpg,.jpeg"
-              required
-            />
-            <div className="invalid-feedback">Please upload a logo (.png, .jpg, .jpeg).</div>
-            <small className="form-text text-muted">Accepted formats: .png, .jpg, .jpeg</small>
-          </div>
+                      <div className="mb-4">
+                        <label className="form-label">Business Logo</label>
+                        <input
+                          type="file"
+                          className="form-control"
+                          accept=".png,.jpg,.jpeg"
+                          required
+                        />
+                        <div className="invalid-feedback">Please upload a logo (.png, .jpg, .jpeg).</div>
+                        <small className="form-text text-muted">Accepted formats: .png, .jpg, .jpeg</small>
+                      </div>
 
-          <button type="submit" className="btn btn-primary">
-            Continue to Next Step
-          </button>
-        </form>
-      )}
+                      <button type="submit" className="btn btn-primary">
+                        Continue to Next Step
+                      </button>
+                    </form>
+                  )}
 
-      {/* Step 2 */}
-      {step === 2 && (
-        <form ref={formRef2} noValidate className={validated ? 'was-validated' : ''} onSubmit={handleFinalSubmit}>
-          <h4 className="text-success mb-4">Step 2: Additional Information</h4>
+                  {/* Step 2 */}
+                  {step === 2 && (
+                    <form ref={formRef2} noValidate className={validated ? 'was-validated' : ''} onSubmit={handleFinalSubmit}>
+                      <h4 className="text-success mb-4">Step 2: Additional Information</h4>
 
-          <div className="mb-3">
-            <label className="form-label">Select Business Category</label>
-            <select className="form-select" required>
-              <option value="">Select a category</option>
-              <option value="furniture">Furniture</option>
-              <option value="electronics">Electronics</option>
-              <option value="grocery">Grocery</option>
-              <option value="services">Professional Services</option>
-            </select>
-            <div className="invalid-feedback">Please select a business category.</div>
-          </div>
+                      <div className="mb-3">
+                        <label className="form-label">Select Business Category</label>
+                        <select className="form-select" required>
+                          <option value="">Select a category</option>
+                          <option value="furniture">Furniture</option>
+                          <option value="electronics">Electronics</option>
+                          <option value="grocery">Grocery</option>
+                          <option value="services">Professional Services</option>
+                        </select>
+                        <div className="invalid-feedback">Please select a business category.</div>
+                      </div>
 
-          <div className="mb-3">
-            <label className="form-label">Select Sub Category</label>
-            <select className="form-select" required>
-              <option value="">Select a subcategory</option>
-              <option value="sofa">Sofa Sets</option>
-              <option value="beds">Beds</option>
-              <option value="chairs">Office Chairs</option>
-              <option value="kitchen">Modular Kitchen</option>
-            </select>
-            <div className="invalid-feedback">Please select a subcategory.</div>
-          </div>
+                      <div className="mb-3">
+                        <label className="form-label">Select Sub Category</label>
+                        <select className="form-select" required>
+                          <option value="">Select a subcategory</option>
+                          <option value="sofa">Sofa Sets</option>
+                          <option value="beds">Beds</option>
+                          <option value="chairs">Office Chairs</option>
+                          <option value="kitchen">Modular Kitchen</option>
+                        </select>
+                        <div className="invalid-feedback">Please select a subcategory.</div>
+                      </div>
 
-          <div className="mb-3">
-            <label className="form-label">Service Area / Pincode</label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="e.g. 400001, 400002"
-              required
-            />
-            <div className="invalid-feedback">Service area or pincode is required.</div>
-          </div>
+                      <div className="mb-3">
+                        <label className="form-label">Service Area / Pincode</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="e.g. 400001, 400002"
+                          required
+                        />
+                        <div className="invalid-feedback">Service area or pincode is required.</div>
+                      </div>
 
-          <div className="mb-4">
-            <label className="form-label">Upload Business Photos</label>
-            <input
-              type="file"
-              className="form-control"
-              multiple
-              accept=".jpg,.jpeg,.png"
-            />
-            <small className="form-text text-muted">You can upload multiple photos of your business.</small>
-          </div>
+                      <div className="mb-4">
+                        <label className="form-label">Upload Business Photos</label>
+                        <input
+                          type="file"
+                          className="form-control"
+                          multiple
+                          accept=".jpg,.jpeg,.png"
+                        />
+                        <small className="form-text text-muted">You can upload multiple photos of your business.</small>
+                      </div>
 
-          <div className="d-flex justify-content-between">
-            <button type="button" className="btn btn-secondary" onClick={() => setStep(1)}>
-              ← Back
-            </button>
-            <button type="submit" className="btn btn-success">
-              Submit Listing
-            </button>
-          </div>
-        </form>
-      )}
-    </>
+                      <div className="d-flex justify-content-between">
+                        <button type="button" className="btn btn-secondary" onClick={() => setStep(1)}>
+                          ← Back
+                        </button>
+                        <button type="submit" className="btn btn-success">
+                          Submit Listing
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </>
               </div>
             </div>
           </div>
