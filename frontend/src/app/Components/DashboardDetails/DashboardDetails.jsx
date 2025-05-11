@@ -18,11 +18,11 @@ const DashboardDetails = ({ type }) => {
             <div className="container mt-4">
                 <div className="card shadow-sm border-0 rounded-4">
                     <div className="card-header bg-primary text-white rounded-top-4">
-                        <h4 className="mb-0">👥 {title} ({users.length})</h4>
+                        <p className="mb-0"><i class="bi bi-people-fill"></i> {title} ({users.length})</p>
                     </div>
                     <div className="card-body p-0">
-                        <div className="table-responsive">
-                            <table className="table table-striped table-hover mb-0 align-middle" style={{ overflowX: 'scroll',overflowY:'scroll' }}>
+                        <div>
+                            <table className="table table-hover align-middle mb-0">
                                 <thead className="table-light">
                                     <tr>
                                         <th>#</th>
