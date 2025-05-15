@@ -203,9 +203,11 @@ import Image from "next/image";
 import logo from "../../Images/logo.jpg";
 import UserLocation from "../UserLocation/UserLocation";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 import "../Navbar/navbar.css";
 import "./businessNavbar.css";
-import '../Hero/hero.css';
+import "../Hero/hero.css";
+
 const placeholderTexts = [
   "Search for plumbers...",
   "Find the best tutors...",
@@ -217,42 +219,59 @@ const placeholderTexts = [
 const BusinessNavbar = () => {
   const router = useRouter();
   const navbarCollapseRef = useRef(null);
+
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [location, setLocation] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [animatedText, setAnimatedText] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
+  const [pinCodes, setPinCodes] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  // for location select opion 
-  const [selectedLocation, setSelectedLocation] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState(null);
+
+  // Fetch PIN codes
+  useEffect(() => {
+    const fetchPinCodes = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/pincode/get-all-pin-codes");
+        if (response.data?.status) {
+          setPinCodes(response.data.pinCodes);
+        }
+      } catch (error) {
+        console.error("Error fetching pin codes:", error);
+      }
+    };
+    fetchPinCodes();
+  }, []);
+
+  const extractPincode = (pinCodeStr) => {
+    const pincode = pinCodeStr?.match(/\d{6}$/);
+    return pincode ? pincode[0] : "";
+  };
 
   const handleSelect = (loc) => {
     setSelectedLocation(loc);
-    setLocation({ pincode: extractPincode(loc) }); // Optional: You can extract a real pincode
+    setLocation({ pincode: loc.pincode });
   };
 
   const handleClear = () => {
-    setSelectedLocation("");
+    setSelectedLocation(null);
     setLocation({});
   };
-  const locations = [
-    "Rohini, Delhi",
-    "Uttam Nagar, Delhi",
-    "Karol Bagh, Delhi",
-    "Shahadara, Delhi",
-    "Dwarka, Delhi",
-    "Laxmi Nagar, Delhi",
-  ];
 
-  const filteredLocations = locations.filter((loc) =>
-    loc.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredLocations = pinCodes.filter((loc) => {
+    const lowerSearch = searchTerm.toLowerCase();
+    return (
+      loc?.stateName?.toLowerCase().includes(lowerSearch) ||
+      loc?.area?.toLowerCase().includes(lowerSearch) ||
+      loc?.pincode?.toString().includes(lowerSearch)
+    );
+  });
 
+  // Handle login state
   useEffect(() => {
     const token = localStorage.getItem("biziffyToken");
-    console.log("Token:", token);
     setIsLoggedIn(!!token);
   }, []);
 
@@ -263,8 +282,7 @@ const BusinessNavbar = () => {
     router.push("/Pages/login");
   };
 
-
-
+  // Collapse outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -281,7 +299,7 @@ const BusinessNavbar = () => {
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  // Animate placeholder typing effect
+  // Typing animation effect
   useEffect(() => {
     let charIndex = 0;
     const interval = setInterval(() => {
@@ -298,11 +316,12 @@ const BusinessNavbar = () => {
   }, [placeholderIndex]);
 
   const handleSearch = () => {
-    if (!location?.pincode) {
-      alert("Please allow location.");
+    const finalPincode = selectedLocation?.pinCode || location?.pincode;
+    if (!finalPincode) {
+      alert("Please select or allow location.");
       return;
     }
-    router.push(`/Pages/bussiness-listing?query=${searchText.trim()}&pincode=${location.pincode}`);
+    router.push(`/Pages/bussiness-listing?query=${searchText.trim()}&pincode=${finalPincode}`);
   };
 
   return (
@@ -314,12 +333,9 @@ const BusinessNavbar = () => {
               <Image src={logo} alt="Company Logo" width={120} height={40} />
             </Link>
 
-            {/* Desktop search bar */}
+            {/* Desktop search */}
             <div className="d-none d-lg-flex business-navbar-search-container">
-              {/* <div className="hero-location-select">
-                <UserLocation location={location} setLocation={setLocation} />
-              </div> */}
-              <div className="dropdown" style={{ borderRight: '1px solid #ccc' }}>
+              <div className="dropdown" style={{ borderRight: "1px solid #ccc" }}>
                 <button
                   className="location-dropdown"
                   type="button"
@@ -327,11 +343,15 @@ const BusinessNavbar = () => {
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                 >
-                  <i className="bi bi-geo-alt me-2"></i><UserLocation location={location} setLocation={setLocation} />
+                  <i className="bi bi-geo-alt me-2"></i>
+                  {selectedLocation ? (
+                    `${selectedLocation.area}, ${selectedLocation.stateName}`
+                  ) : (
+                    <UserLocation location={location} setLocation={setLocation} />
+                  )}
                 </button>
 
                 <ul className="dropdown-menu home-select-location p-3 location-dropdown" aria-labelledby="locationDropdown">
-                  {/* Search Input */}
                   <li>
                     <input
                       type="text"
@@ -347,17 +367,12 @@ const BusinessNavbar = () => {
                       Clear All
                     </span>
                   </li>
-                  <li>
-                    <a className="dropdown-item" onClick={() => handleSelect("Rohini, Delhi")}>
-                      Rohini, Delhi
-                    </a>
-                  </li>
                   {filteredLocations.length > 0 ? (
                     filteredLocations.map((loc, i) => (
                       <li key={i}>
-                        <a className="dropdown-item" onClick={() => handleSelect(loc)}>
-                          {loc}
-                        </a>
+                        <button className="dropdown-item" onClick={() => handleSelect(loc)}>
+                          {loc.area}, {loc.stateName}
+                        </button>
                       </li>
                     ))
                   ) : (
@@ -371,12 +386,7 @@ const BusinessNavbar = () => {
                 className="hero-search-input"
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleSearch();
-                  }
-                }}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 placeholder={animatedText}
               />
               <button className="hero-search-btn" onClick={handleSearch} aria-label="Search">
@@ -384,13 +394,9 @@ const BusinessNavbar = () => {
               </button>
             </div>
 
-            {/* Mobile buttons */}
+            {/* Mobile toggle */}
             <div className="d-flex gap-3 d-lg-none">
-              <button
-                className="btn btn-link p-0"
-                onClick={() => setShowMobileSearch(!showMobileSearch)}
-                aria-label="Toggle search"
-              >
+              <button className="btn btn-link p-0" onClick={() => setShowMobileSearch(!showMobileSearch)} aria-label="Toggle search">
                 <i className="bi bi-search fs-4"></i>
               </button>
 
@@ -407,63 +413,29 @@ const BusinessNavbar = () => {
               </button>
             </div>
 
-            {/* Right links */}
-            {/* <div className="collapse navbar-collapse justify-content-end" id="navbarSupportedContent" ref={navbarCollapseRef}            >
-              <div className="d-flex align-items-center">
-                <Link href="/Pages/login" className="btn bg-primary text-white me-2">
-                  Sign In
-                </Link>
-                <Link href="/Pages/signup" className="btn bg-dark text-white me-2">
-                  Register
-                </Link>
-              </div>
-            </div> */}
-
+            {/* Right profile */}
             {!isLoggedIn ? (
-
-              <div className="d-flex align-items-center ">
-                <Link
-                  href="/Pages/login"
-                  className="btn btn bg-primary text-white me-2"
-                >
+              <div className="d-flex align-items-center">
+                <Link href="/Pages/login" className="btn btn bg-primary text-white me-2">
                   SignIn
                 </Link>
-                <Link
-                  href="/Pages/signup"
-                  className="btn btn bg-dark text-white me-2"
-                >
+                <Link href="/Pages/signup" className="btn btn bg-dark text-white me-2">
                   Register
                 </Link>
               </div>
             ) : (
-
               <div className="dropdown">
-                <button
-                  className="btn border-0 d-flex align-items-center"
-                  type="button"
-                  id="profileDropdown"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                  style={{ backgroundColor: 'transparent' }}
-                >
+                <button className="btn border-0 d-flex align-items-center" type="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                   <i className="bi bi-person-circle fs-3 text-dark"></i>
                 </button>
-
-                <ul
-                  className="dropdown-menu dropdown-menu-end shadow-lg border-0"
-                  aria-labelledby="profileDropdown"
-                  style={{ minWidth: '150px' }}
-                >
+                <ul className="dropdown-menu dropdown-menu-end shadow-lg border-0" aria-labelledby="profileDropdown" style={{ minWidth: "150px" }}>
                   <li>
                     <Link href="/Pages/Profile" className="dropdown-item d-flex align-items-center gap-2">
                       <i className="bi bi-person"></i> Dashboard
                     </Link>
                   </li>
                   <li>
-                    <button
-                      className="dropdown-item d-flex align-items-center gap-2 text-danger"
-                      onClick={handleLogout}
-                    >
+                    <button className="dropdown-item d-flex align-items-center gap-2 text-danger" onClick={handleLogout}>
                       <i className="bi bi-box-arrow-right"></i> Logout
                     </button>
                   </li>
@@ -474,7 +446,7 @@ const BusinessNavbar = () => {
         </nav>
       </section>
 
-      {/* Mobile search dropdown */}
+      {/* Mobile search bar */}
       {showMobileSearch && (
         <div className="mobile-search-slide animate__animated animate__slideInDown">
           <div className="container-fluid d-flex flex-column bg-white p-3 shadow">

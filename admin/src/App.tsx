@@ -56,6 +56,8 @@ import EditStates from "./pages/admin/EditState";
 import AllPinCode from "./pages/admin/AllPinCode";
 import CreatePinCode from "./pages/admin/CreatePinCode";
 import EditPinCode from "./pages/admin/EditPinCode";
+import AllWebsiteListing from "./pages/admin/AllWebsiteListing";
+import WebsiteListingDetails from "./pages/admin/WebsiteListingDetails";
 
 
 const queryClient = new QueryClient();
@@ -78,6 +80,9 @@ const App = () => (
             {/* <Route path="/admin/DashboardManager" element={<ProtectedRoute><DashboardManager /></ProtectedRoute>} /> */}
             <Route path="/admin/listings" element={<ProtectedRoute><AllListings /></ProtectedRoute>} />
             <Route path="/admin/listings/details/:id" element={<ProtectedRoute><ListingDetails /></ProtectedRoute>} />
+            <Route path="/admin/Website/listings" element={<ProtectedRoute><AllWebsiteListing /></ProtectedRoute>} />
+            <Route path="/admin/Website/listings/details/:id" element={<ProtectedRoute><WebsiteListingDetails /></ProtectedRoute>} />
+
             <Route path="/admin/membership" element={<ProtectedRoute><Membership /></ProtectedRoute>} />
             <Route path="/admin/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
             <Route path="/admin/links" element={<ProtectedRoute><Links /></ProtectedRoute>} />

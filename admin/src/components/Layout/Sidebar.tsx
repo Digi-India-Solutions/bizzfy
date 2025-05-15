@@ -143,7 +143,19 @@ export const Sidebar = () => {
                           isActive("/admin/listings") && "bg-blue-50 text-blue-600"
                         )}
                       >
-                        All Listings
+                        All Business Listings
+                      </Link>
+                    </li>
+
+                    <li>
+                      <Link
+                        to="/admin/Website/listings"
+                        className={cn(
+                          "flex items-center px-4 py-2 text-gray-700 rounded-md hover:bg-blue-50 hover:text-blue-600",
+                          isActive("/admin/Website/listings") && "bg-blue-50 text-blue-600"
+                        )}
+                      >
+                        All Website Listings
                       </Link>
                     </li>
                   </ul>

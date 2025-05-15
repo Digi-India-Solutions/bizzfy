@@ -30,6 +30,7 @@ import contactRoutes from "./routes/admin/contactRoutes"
 
 // hm yaha per all listiing ka data import kr rhe hai
 import businessListingRoutes from "./routes/admin/businessListingRoutes";
+import websiteListingRoutes from "./routes/admin/websiteListingRoutes";
 
 // for signup 
 import authRoutes from "./routes/admin/authRoutes";
@@ -82,9 +83,10 @@ app.use("/api/admin", dealRoutes);
 app.use("/api/admin", collectionRoutes);
 app.use("/api/state", stateRoutes);
 app.use("/api/populerCity", populerCityRoutes);
-app.use("/api/pincode" ,pinCodeRoutes)
+app.use("/api/pincode", pinCodeRoutes)
 
-app.use("/api/admin", businessListingRoutes); // this makes /api/admin/business and /api/admin/contact work
+app.use("/api/admin", businessListingRoutes);
+app.use("/api/admin", websiteListingRoutes);
 
 // signup
 app.use("/api/auth", authRoutes);

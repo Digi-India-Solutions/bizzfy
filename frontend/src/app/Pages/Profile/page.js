@@ -21,6 +21,7 @@ const ProfilePage = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [businessListing, setBusinessListing] = useState([]);
+  const [websiteListing, setWebsiteListing] = useState([]);
   const [listingId, setListingId] = useState('')
   const [listings, setListings] = useState([
     { id: 1, title: "Awesome Cafe", address: "Bawana Delhi 110039", image: profileImage, },
@@ -97,9 +98,24 @@ const ProfilePage = () => {
       }
     };
 
+    const fetchWebsiteListing = async () => {
+      if (!userId) return;
+      try {
+        const res = await axios.get(`http://localhost:5000/api/admin/get-all-website-listings-by-user-id/${userId}`);
+        console.log("Website Listings", res?.data?.data);
+        if (res?.data?.status === true) {
+          setWebsiteListing(res?.data?.data);
+        } else {
+          toast.error("Business listing not found.");
+        }
+      } catch (err) {
+        console.error("Error fetching business listing:", err);
+      }
+    };
 
     fetchUserData();
     fetchBussinessListing();
+    fetchWebsiteListing()
   }, [userId]);
 
   // const handleDelete = (id) => {
@@ -308,7 +324,7 @@ const ProfilePage = () => {
                   </button>
                   <button
                     className={`sidebar-tab ${activeTab === "websitelisting" ? "active" : ""}`} onClick={() => setActiveTab("websitelisting")}>
-                    <i className="bi bi-list-task"></i> My Website Listing
+                    <i class="bi bi-globe2"></i> My Website Listing
                   </button>
                   <button
                     className={`sidebar-tab ${activeTab === "plan" ? "active" : ""}`} onClick={() => setActiveTab("plan")}>
@@ -494,33 +510,34 @@ const ProfilePage = () => {
                   )}
                 </div>
               )}
+
               {activeTab === "websitelisting" && (
                 <div className="profile-plan-table">
                   <div className="d-flex justify-content-between align-items-center">
-                    <h3>My website Listing</h3>
+                    <h3>My website Listing</h3> 
                     <div>
-                      <button className="btn btn-primary" onClick={() => router?.push("/Pages/freelistingform")}>
-                        <i className="bi bi-pencil-square"></i> Add New Business
+                      <button className="btn btn-primary" onClick={() => router?.push("/Pages/list-your-webiste")}>
+                        <i className="bi bi-pencil-square"></i> Add New Website
                       </button>
                     </div>
                   </div>
                   <hr />
                   <ToastContainer />
-                  {businessListing.length > 0 ? (
-                    businessListing.map((listing) => (
+                  {websiteListing?.length > 0 ? (
+                    websiteListing?.map((listing) => (
                       <div className="profile-listing mb-3" key={listing?._id}>
                         <div className="row listing-item">
                           <div className="col-md-3">
-                            <img src={listing?.businessCategory?.businessImages[0]} alt={listing.title} className="listing-img" />
+                            <img src={listing?.logo} alt={listing?.companyName} className="listing-img" />
                           </div>
                           <div className="col-md-9">
-                            <h4 className="text-primary">{listing?.businessDetails?.businessName}</h4>
-                            <p className="text-success">{[listing?.businessDetails?.area, listing?.businessDetails?.city, listing?.businessDetails?.state, listing?.businessDetails?.pinCode].filter(Boolean).join(", ")}</p>
+                            <h4 className="text-primary">{listing?.companyName}</h4>
+                            <p className="text-success">{[listing?.area, listing?.city, listing?.state, listing?.pinCode].filter(Boolean).join(", ")}</p>
                             <Link href="/Pages/free-listing#paidlisting" className="login-btn me-2" >
                               Advertise Now
                             </Link>
                             <button className={`black-btn ${activeTab === "edit-business" ? "active" : ""}`} onClick={() => { setActiveTab("edit-business"), setListingId(listing) }}>
-                              Edit Business
+                              Edit Website
                             </button>
 
                             {/* <button className="btn btn-danger" onClick={() => handleDelete(listing?._id)}>
@@ -545,6 +562,7 @@ const ProfilePage = () => {
               )}
 
               {activeTab === "plan" && (
+
                 <div className="profile-plan-table">
                   <h3>My Plan</h3>
                   <hr />
