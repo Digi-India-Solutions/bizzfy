@@ -3,7 +3,8 @@ import express from 'express';
 import { upload } from "../../middleware/upload";
 import {
     createAdditionalInformation, createDetails, getAllWebsiteListings, getAllWebsiteListingsById, deleteWebsiteListing,
-    updateWebsiteListingStatus, listingBulkAction, searchWebsiteListings, getAllWebsiteListingsByUserId,increaseClickCountWebsiteListing
+    updateWebsiteListingStatus, listingBulkAction, searchWebsiteListings, getAllWebsiteListingsByUserId,increaseClickCountWebsiteListing,
+    updateAllWebsiteListingsById
 } from '../../controllers/admin/websiteListingController';
 const router = express.Router();
 
@@ -21,8 +22,8 @@ router.post("/website-listing-bulk-action", listingBulkAction)
 router.get("/search-website-listings", searchWebsiteListings)
 router.get("/get-all-website-listings-by-user-id/:id", getAllWebsiteListingsByUserId)
 
-// router.post("/update-listings-by-id/:id", upload.any(), updateAllListingsById);
-// // router.post("/update-listings-without-image-by-id/:id", updateAllListingsWithoutImageById);
+router.post("/update-website-listings-by-id/:id",  upload.single("logo"), updateAllWebsiteListingsById);
+// router.post("/update-listings-without-image-by-id/:id", updateAllListingsWithoutImageById);
 
 // router.post("/change-publish-status/:id", changePublishStatus)
 

@@ -270,7 +270,7 @@ import styles from "./module.css"; // Make sure your CSS file is correctly named
 import axios from "axios";
 
 const BusinessListingPage = () => {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(2);
   const [validated, setValidated] = useState(false);
   const [subCategoryList, setSubCategoryList] = useState([])
   const [categoryList, setCategoryList] = useState([])

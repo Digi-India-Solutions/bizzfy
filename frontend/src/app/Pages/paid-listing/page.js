@@ -3,6 +3,7 @@ import Link from "next/link";
 import React, { useEffect } from "react";
 import profileImage from "../../Images/blog1.jpg";
 import "./paid-listing.css";
+import axios from "axios";
 
 const page = ({ websiteList ,user }) => {
 
@@ -18,11 +19,11 @@ const page = ({ websiteList ,user }) => {
 
     if (!lastClickDay || parseInt(lastClickDay) < currentDay) {
 
-      axios.post(`http://localhost:5000/api/admin/increase-click-count-website-listing/${id}`, { type, user })
-        .then(() => { console.log(`${type} click counted`); localStorage.setItem(key, currentDay.toString()); })
+      axios.post(`http://localhost:5000/api/admin/increase-click-count-website-listing/${id}`, { user })
+        .then(() => { console.log(`click counted`); localStorage.setItem(key, currentDay.toString()); })
         .catch((err) => { console.error("Error increasing count", err) });
     } else {
-      console.log(`${type} already clicked today — not counted`);
+      console.log(`already clicked today — not counted`);
     }
   }
 

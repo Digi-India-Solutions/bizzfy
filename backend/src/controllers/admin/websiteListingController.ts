@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { deleteImage, uploadImage } from "../../utils/cloudinary";
 import { deleteLocalFile } from "../../utils/deleteImageFromLocalFolder";
 import WebsiteListing from "../../models/WebsiteListingModel";
+import { count } from "console";
 
 export const createDetails = async (req: Request, res: Response) => {
     try {
@@ -10,10 +11,10 @@ export const createDetails = async (req: Request, res: Response) => {
         const { companyName, website, shortDescription,
             // aboutBusiness, 
             // area,
-             service, userId } = req.body;
+            service, userId } = req.body;
 
         // Validate required fields
-        if (!companyName || !website || !shortDescription ||  !service) {
+        if (!companyName || !website || !shortDescription || !service) {
             return res.status(400).json({ message: "All fields are required", status: false });
         }
 
@@ -113,7 +114,8 @@ export const getAllWebsiteListings = async (req: Request, res: Response) => {
             .sort({ createdAt: -1 })
             .populate('category')
             .populate('subCategory')
-            .populate("userId");
+            .populate("userId")
+            .populate("cliCkCount.websiteClick.user")
 
         console.log("XXXXXXXX", listings)
         res.status(200).json({ status: true, message: "Listings fetched successfully", data: listings });
@@ -276,6 +278,7 @@ export const getAllWebsiteListingsByUserId = async (req: Request, res: Response)
         const listings = await WebsiteListing.find({ "userId": userId })
             .populate("category")
             .populate("subCategory")
+            .populate("cliCkCount.websiteClick.user")
 
         if (!listings || listings.length === 0) {
             return res.status(404).json({ status: false, message: "No listings found for this user.", });
@@ -287,85 +290,111 @@ export const getAllWebsiteListingsByUserId = async (req: Request, res: Response)
     }
 };
 
-// export const updateAllListingsById = async (req: Request, res: Response) => {
-//   try {
-//     const listingId = req.params.id;
-//     const existingListing = await BusinessListing.findById(listingId);
 
-//     if (!existingListing) {
-//       return res.status(404).json({ status: false, message: "Listing not found" });
-//     }
+export const increaseClickCountWebsiteListing = async (req: Request, res: Response) => {
+    try {
+        const { user, } = req.body;
+        const Id = req.params.id;
 
-//     const files = req.files as Express.Multer.File[] || [];
-//     const {
-//       contactPerson,
-//       businessDetails,
-//       businessCategory,
-//       upgradeListing,
-//     } = req.body;
+        const type = 'websiteClick'
 
-//     // Utility to parse stringified JSON
-//     const parseIfJson = (data: any) => {
-//       try {
-//         return typeof data === "string" ? JSON.parse(data) : data;
-//       } catch {
-//         return data;
-//       }
-//     };
+        if (!user || !type) {
+            return res.status(400).json({ status: false, message: "Missing 'user' or 'type' in body.", });
+        }
 
-//     const parsedContact = parseIfJson(contactPerson);
-//     const parsedDetails = parseIfJson(businessDetails);
-//     const parsedCategory = parseIfJson(businessCategory);
-//     const parsedUpgrade = parseIfJson(upgradeListing);
+        const business = await WebsiteListing.findById(Id);
+        if (!business) {
+            return res.status(404).json({ status: false, message: "Business not found.", });
+        }
 
-//     // Extract files with fieldname `businessImages`
-//     const uploadedImageFiles = files.filter(file =>
-//       file.fieldname.startsWith("businessImages")
-//     );
+        if (!business.cliCkCount) {
+            business.cliCkCount = new Map();
+        }
 
-//     let imageUrls: string[] = [];
+        let clickData = business.cliCkCount.get(type);
 
-//     if (uploadedImageFiles.length > 0) {
-//       // Delete old images before uploading new ones
-//       if (existingListing.businessCategory?.businessImages?.length > 0) {
-//         for (const oldImage of existingListing.businessCategory.businessImages) {
-//           await deleteImage(oldImage);
-//         }
-//       }
+        if (!clickData) {
+            clickData = { count: 0, user: [] };
+        }
 
-//       // Upload new images
-//       for (const file of uploadedImageFiles) {
-//         const uploadedUrl = await uploadImage(file.path);
-//         imageUrls.push(uploadedUrl);
-//         deleteLocalFile(file.path);
-//       }
+        if (!Array.isArray(clickData.user)) {
+            clickData.user = [];
+        }
 
-//       parsedCategory.businessImages = imageUrls;
-//     } else {
-//       // No new images uploaded, keep existing images
-//       parsedCategory.businessImages = existingListing.businessCategory?.businessImages || [];
-//     }
+        const userExists = clickData.user.some((u: any) => u.toString() === user);
+        if (!userExists) {
+            clickData.user.push(user);
+            clickData.count += 1;
+        }
 
-//     // Perform the update
-//     const updated = await BusinessListing.findByIdAndUpdate(
-//       listingId,
-//       {
-//         contactPerson: parsedContact,
-//         businessDetails: parsedDetails,
-//         businessCategory: parsedCategory,
-//         upgradeListing: parsedUpgrade,
-//         faq: JSON.parse(req?.body?.faq) || req?.body?.faq
-//       },
-//       { new: true }
-//     );
+        business.cliCkCount.set(type, clickData);
 
-//     return res.status(200).json({ status: true, message: "Listing updated successfully", data: updated, });
+        await business.save();
 
-//   } catch (error: unknown) {
-//     const err = error as Error;
-//     return res.status(500).json({ status: false, message: "Error updating listing", error: err.message, });
-//   }
-// };
+        return res.status(200).json({ status: true, message: `${type} click count incremented.`, updatedCounts: clickData, });
+    } catch (error: any) {
+        console.error("Click count error:", error);
+        return res.status(500).json({ status: false, message: error.message || "Server error.", });
+    }
+};
+
+
+export const updateAllWebsiteListingsById = async (req: Request, res: Response) => {
+    try {
+        const listingId = req.params.id;
+        const existingListing = await WebsiteListing.findById(listingId);
+
+        if (!existingListing) {
+            return res.status(404).json({ status: false, message: "Listing not found" });
+        }
+
+        const { companyName, website, shortDescription, service, userId } = req.body;
+
+        // Validate required fields
+        if (!companyName || !website || !shortDescription || !service) {
+            return res.status(400).json({ message: "All fields are required", status: false });
+        }
+
+        // Handle logo image update
+        const file = (req.file || (req.files && Array.isArray(req.files) && req.files[0])) as Express.Multer.File | undefined;
+        let newLogoUrl = existingListing.logo;
+
+        if (file) {
+            // Delete old image if it exists
+            if (existingListing.logo) {
+                await deleteImage(existingListing.logo);
+            }
+
+            newLogoUrl = await uploadImage(file.path);
+            deleteLocalFile(file.path);
+        }
+
+        // Perform the update
+        existingListing.companyName = companyName;
+        existingListing.website = website;
+        existingListing.shortDescription = shortDescription;
+        existingListing.userId = userId;
+        existingListing.service = Array.isArray(service) ? service : [service];
+        existingListing.logo = newLogoUrl;
+
+        const updatedListing = await existingListing.save();
+
+        res.status(200).json({
+            message: "Business listing updated successfully",
+            status: true,
+            data: updatedListing,
+        });
+
+    } catch (error: unknown) {
+        const err = error as Error;
+        console.error("Error updating business listing:", err);
+        res.status(500).json({
+            message: "Failed to update business listing",
+            status: false,
+            error: err.message,
+        });
+    }
+};
 
 
 
@@ -402,56 +431,3 @@ export const getAllWebsiteListingsByUserId = async (req: Request, res: Response)
 //   }
 // };
 
-export const increaseClickCountWebsiteListing = async (req: Request, res: Response) => {
-//   try {
-//     const {  user } = req.body;
-//     const Id = req.params.id;
-   
-//     if (!user) {
-//       return res.status(400).json({ status: false, message: "Missing userId in body." });
-//     }
-//     const business = await WebsiteListing.findById(Id);
-//     if (!business) {
-//       return res.status(404).json({ status: false, message: "Business not found." });
-//     }
-
-//     // Ensure clickCounts is initialized
-//     if (!business.cliCkCount) {
-//       business.cliCkCount = {} as any;
-//     }
-
-//     // Ensure the specific click type is initialized
-//     if (!business.cliCkCount[type]) {
-//       business.cliCkCount[type] = {
-//         count: 0,
-//         user: [],
-//       };
-//     }
-
-//     // If user is not an array (corrupted), convert it
-//     if (!Array.isArray(cliCkCount[type].user)) {
-//         cliCkCount[type].user = cliCkCount[type].user
-//         ? [cliCkCount[type].user]
-//         : [];
-//     }
-
-//     // Only add user if not already present
-//     if (!cliCkCount[type].user.some((u: any) => u.toString() === user)) {
-//         cliCkCount[type].user.push(user);
-//     }
-
-//     // Increment the click count
-//     cliCkCount[type].count += 1;
-
-//     await business.save();
-
-//     return res.status(200).json({
-//       status: true,
-//       message: `${type} click count incremented.`,
-//       updatedCounts: cliCkCount[type],
-//     });
-//   } catch (error: any) {
-//     console.error("Click count error:", error);
-//     return res.status(500).json({ status: false, message: error.message || "Server error." });
-//   }
-};

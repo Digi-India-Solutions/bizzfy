@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import "./profile.css";
 import EditBusinessProfile from "../../Components/ProfilesComponents/Edit-business-profile/Edit-business-profile";
+import EditWebsiteProfile from "../../Components/ProfilesComponents/Edit-Website-Profile/EditWebsiteProfile"
 import AllEnquiry from "../../Components/ProfilesComponents/all-enquiry/all-enquiry";
 import Support from "../../Components/ProfilesComponents/Support/Support";
 import { toast, ToastContainer } from "react-toastify";
@@ -12,6 +13,7 @@ import Head from "next/head";
 import axios from "axios";
 import Dashboard from "../../Components/Dashboard/Dashboard"
 import { useRouter } from "next/navigation";
+import ShowWebsiteCout from "../../Components/ShowWebsiteCout/ShowWebsiteCout"
 const ProfilePage = () => {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -23,11 +25,13 @@ const ProfilePage = () => {
   const [businessListing, setBusinessListing] = useState([]);
   const [websiteListing, setWebsiteListing] = useState([]);
   const [listingId, setListingId] = useState('')
-  const [listings, setListings] = useState([
-    { id: 1, title: "Awesome Cafe", address: "Bawana Delhi 110039", image: profileImage, },
-    { id: 2, title: "ModakWala Cafe", address: "Bawana Delhi 110039", image: profileImage, },
-    { id: 3, title: "Hari Sweets", address: "Bawana Delhi 110039", image: profileImage, },
-  ]);
+  const [showWebsiteVijiter, setShowWebsiteVijiter] = useState(false)
+  const [showsiteVijiter, setWebsiteVijiter] = useState(false)
+  // const [listings, setListings] = useState([
+  //   { id: 1, title: "Awesome Cafe", address: "Bawana Delhi 110039", image: profileImage, },
+  //   { id: 2, title: "ModakWala Cafe", address: "Bawana Delhi 110039", image: profileImage, },
+  //   { id: 3, title: "Hari Sweets", address: "Bawana Delhi 110039", image: profileImage, },
+  // ]);
 
   const userProfile = {
     firstname: "Maria",
@@ -243,9 +247,13 @@ const ProfilePage = () => {
     }
   };
 
-  console.log("User ID:", userId);
+  const showListing = (listing) => {
+    setShowWebsiteVijiter(true)
+    setWebsiteVijiter(listing?.cliCkCount?.websiteClick)
+  }
+  // console.log("User ID:", userId);
 
-  console.log("XXXXXXXXXXXXX:__--:-", profileData)
+  // console.log("XXXXXXXXXXXXX:__--:-", profileData)
   return (
     <>
       <ToastContainer />
@@ -514,16 +522,18 @@ const ProfilePage = () => {
               {activeTab === "websitelisting" && (
                 <div className="profile-plan-table">
                   <div className="d-flex justify-content-between align-items-center">
-                    <h3>My website Listing</h3> 
+                    <h3>My website Listing</h3>
                     <div>
-                      <button className="btn btn-primary" onClick={() => router?.push("/Pages/list-your-webiste")}>
+                      {showWebsiteVijiter === false ? <button className="btn btn-primary" onClick={() => router?.push("/Pages/list-your-webiste")}>
                         <i className="bi bi-pencil-square"></i> Add New Website
-                      </button>
+                      </button> : <button className="btn btn-primary" onClick={() => setShowWebsiteVijiter(false)}>
+                        <i className="bi bi-pencil-square"></i> Back Website Listing
+                      </button>}
                     </div>
                   </div>
                   <hr />
                   <ToastContainer />
-                  {websiteListing?.length > 0 ? (
+                  {showWebsiteVijiter === false ? <>{websiteListing?.length > 0 ? (
                     websiteListing?.map((listing) => (
                       <div className="profile-listing mb-3" key={listing?._id}>
                         <div className="row listing-item">
@@ -532,17 +542,17 @@ const ProfilePage = () => {
                           </div>
                           <div className="col-md-9">
                             <h4 className="text-primary">{listing?.companyName}</h4>
-                            <p className="text-success">{[listing?.area, listing?.city, listing?.state, listing?.pinCode].filter(Boolean).join(", ")}</p>
+                            {/* <p className="text-success">{[listing?.area, listing?.city, listing?.state, listing?.pinCode].filter(Boolean).join(", ")}</p> */}
                             <Link href="/Pages/free-listing#paidlisting" className="login-btn me-2" >
                               Advertise Now
                             </Link>
-                            <button className={`black-btn ${activeTab === "edit-business" ? "active" : ""}`} onClick={() => { setActiveTab("edit-business"), setListingId(listing) }}>
+                            <button className={`black-btn ${activeTab === "edit-website" ? "active" : ""}`} onClick={() => { setActiveTab("edit-website"), setListingId(listing) }}>
                               Edit Website
                             </button>
 
-                            {/* <button className="btn btn-danger" onClick={() => handleDelete(listing?._id)}>
-                              <i className="bi bi-trash"></i>
-                            </button> */}
+                            <button className="btn btn-danger" onClick={() => showListing(listing)}>
+                              <i className="bi bi-eye"></i> View Visitors <div style={{ color: "black" }}>{listing?.cliCkCount?.websiteClick?.count}</div>
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -551,7 +561,9 @@ const ProfilePage = () => {
                     <p className="no-listing">
                       You have No Website Listings. Please Go To List Your Business.
                     </p>
-                  )}
+                  )}</> : <>
+                    <ShowWebsiteCout setWebsiteVijiter={setWebsiteVijiter} websiteVijiter={showsiteVijiter} />
+                  </>}
                 </div>
               )}
 
@@ -560,6 +572,15 @@ const ProfilePage = () => {
                   <EditBusinessProfile listingId={listingId} />
                 </>
               )}
+
+              {activeTab === "edit-website" && (
+                <>
+                  <EditWebsiteProfile listingId={listingId} />
+                </>
+              )}
+
+
+
 
               {activeTab === "plan" && (
 
