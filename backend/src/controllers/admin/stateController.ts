@@ -8,11 +8,11 @@ export const createState = async (req: Request, res: Response) => {
   try {
     const { name } = req.body;
     if (!name) {
-      return res.status(400).json({ error: "Name  are required" });
+      return res.status(200).json({ status: false, error: "Name  are required" });
     }
     const existingState = await State.findOne({ name });
     if (existingState) {
-      return res.status(409).json({ error: "State with this name already exists" });
+      return res.status(201).json({ status: false, error: "State with this name already exists" });
     }
 
     const uniqueNumId = new ShortUniqueId({ length: 6, dictionary: "number" });

@@ -129,25 +129,68 @@ const AllPinCode = () => {
 
     const handleSubmitExcel = async () => {
         try {
+            if (!excelData || excelData.length === 0) {
+                toast({
+                    variant: "destructive",
+                    title: "No data",
+                    description: "Please upload a valid Excel file first.",
+                });
+                return;
+            }
+    
             setExcelLoading(true);
-
+    
             const response = await axios.post("http://localhost:5000/api/pincode/create-pincode-by-excel", excelData);
-            console.log("response:---", response)
-            if (response?.data?.status === true) {
-                toast({ title: "Submitted", description: "PinCode created Successfully." });
+            const { status, created, duplicates, invalid, createdCount, duplicateCount, invalidCount } = response?.data;
+    
+            if (status === true) {
+                if (createdCount > 0) {
+                    toast({
+                        title: "Success",
+                        description: `${createdCount} PinCodes created successfully.`,
+                    });
+                }
+    
+                if (duplicateCount > 0) {
+                    toast({
+                        variant: "destructive",
+                        title: "Duplicates Skipped",
+                        description: `${duplicateCount} duplicate records found.`,
+                    });
+                }
+    
+                if (invalidCount > 0) {
+                    const invalidPreview = invalid.slice(0, 3).map(i => `${i["Area Name"]} (${i.reason})`).join(", ");
+                    toast({
+                        variant: "destructive",
+                        title: "Invalid Records",
+                        description: `${invalidCount} invalid entries found. Example: ${invalidPreview}${invalidCount > 3 ? '...' : ''}`,
+                    });
+                }
+    
+                // Optional: Reset UI
                 setExcelData([]);
                 setFileName("");
-                Optionally: fetchPinCodes();
+                fetchPinCodes?.(); // If defined, refresh the list
             } else {
-                toast({ variant: "destructive", title: "Error", description: "Submission failed." });
+                toast({
+                    variant: "destructive",
+                    title: "Submission Failed",
+                    description: response?.data?.message || "Something went wrong.",
+                });
             }
         } catch (error) {
             console.error("Excel submission failed", error);
-            // toast.error("Something went wrong");
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "An unexpected error occurred while uploading the data.",
+            });
         } finally {
             setExcelLoading(false);
         }
     };
+    
 
     //////////////////////////////////////////////////////////////////////////////////////
 

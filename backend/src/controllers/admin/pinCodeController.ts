@@ -1,46 +1,123 @@
 import PinCode from "../../models/PinCodeModel"; // Adjust path as needed
+import State from "../../models/StateModel";
+
+// export const createPincodeByExcel = async (req: Request, res: Response) => {
+//     try {
+//         const data = req.body;
+
+//         if (!Array.isArray(data) || data.length === 0) {
+//             return res.status(400).json({ status: false, message: "Input data must be a non-empty array.", });
+//         }
+
+//         const created = [];
+//         const duplicates = [];
+//         const invalid = [];
+
+//         for (let item of data) {
+//             const state = item["State"];
+//             const area = item["Area Name"];
+//             const pinCode = String(item["pinCode"]);
+
+//             // Validation
+//             if (!state || !area || !pinCode) {
+//                 invalid.push({ ...item, reason: "Missing required fields" });
+//                 continue;
+//             }
+//             const existStates = await State.find({ name: state })
+//             if (!existStates.length <= 1) {
+//                 return res.status(400).json({ status: true, message: "State is not Exist", });
+//             }
+//             // const exists = await PinCode.findOne({ stateName: new RegExp(`^${state}$`, "i"), area: new RegExp(`^${area}$`, "i"), pinCode, });
+
+//             if (exists) {
+//                 duplicates.push({ ...item, reason: "Already exists" });
+//                 continue;
+//             }
+
+//             Create
+//             const newPin = await PinCode.create({ stateName: state.trim(), area: area.trim(), pinCode: pinCode.trim(), });
+
+//             created.push(newPin);
+//         }
+
+//         return res.status(200).json({ status: true, message: "Pin codes processed", createdCount: created.length, duplicateCount: duplicates.length, invalidCount: invalid.length, created, duplicates, invalid, });
+//     } catch (err) {
+//         console.error("Error uploading pin codes:", err);
+//         return res.status(500).json({ status: false, message: "Server error while uploading pin codes", });
+//     }
+// };
 
 export const createPincodeByExcel = async (req: Request, res: Response) => {
     try {
         const data = req.body;
 
         if (!Array.isArray(data) || data.length === 0) {
-            return res.status(400).json({ status: false, message: "Input data must be a non-empty array.", });
+            return res.status(400).json({
+                status: false,
+                message: "Input data must be a non-empty array.",
+            });
         }
 
-        const created = [];
-        const duplicates = [];
-        const invalid = [];
+        const created: any[] = [];
+        const duplicates: any[] = [];
+        const invalid: any[] = [];
 
-        for (let item of data) {
+        for (const item of data) {
             const state = item["State"];
             const area = item["Area Name"];
-            const pinCode = String(item["pinCode"]);
+            const pinCode = String(item["pinCode"]).trim();
 
-            // Validation
+            // Validate required fields
             if (!state || !area || !pinCode) {
-                invalid.push({ ...item, reason: "Missing required fields" });
+                invalid.push({ ...item, reason: "Missing required fields" ,status: false });
                 continue;
             }
 
-            // Check if already exists
-            const exists = await PinCode.findOne({ stateName: new RegExp(`^${state}$`, "i"), area: new RegExp(`^${area}$`, "i"), pinCode, });
+            // Check if the state exists
+            const existingStates = await State.findOne({ name: new RegExp(`^${state.trim()}$`, "i") });
+            if (!existingStates) {
+                invalid.push({ ...item, reason: "State does not exist", status: false });
+                continue;
+            }
+
+            // Check for existing pincode
+            const exists = await PinCode.findOne({
+                stateName: new RegExp(`^${state.trim()}$`, "i"),
+                area: new RegExp(`^${area.trim()}$`, "i"),
+                pinCode,
+            });
 
             if (exists) {
                 duplicates.push({ ...item, reason: "Already exists" });
                 continue;
             }
 
-            // Create
-            const newPin = await PinCode.create({ stateName: state.trim(), area: area.trim(), pinCode: pinCode.trim(), });
+            // Create new pincode
+            const newPin = await PinCode.create({
+                stateName: state.trim(),
+                area: area.trim(),
+                pinCode,
+            });
 
             created.push(newPin);
         }
 
-        return res.status(200).json({ status: true, message: "Pin codes processed", createdCount: created.length, duplicateCount: duplicates.length, invalidCount: invalid.length, created, duplicates, invalid, });
+        return res.status(200).json({
+            status: true,
+            message: "Pin codes processed",
+            createdCount: created.length,
+            duplicateCount: duplicates.length,
+            invalidCount: invalid.length,
+            created,
+            duplicates,
+            invalid,
+        });
     } catch (err) {
         console.error("Error uploading pin codes:", err);
-        return res.status(500).json({ status: false, message: "Server error while uploading pin codes", });
+        return res.status(500).json({
+            status: false,
+            message: "Server error while uploading pin codes",
+        });
     }
 };
 
